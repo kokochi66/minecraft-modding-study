@@ -28,7 +28,7 @@ public class User {
     @CreatedDate
     private LocalDateTime regDate;
 
-    @OneToMany(mappedBy = "productImgId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ProductImg> productImgList = new ArrayList<>();
 
 }
