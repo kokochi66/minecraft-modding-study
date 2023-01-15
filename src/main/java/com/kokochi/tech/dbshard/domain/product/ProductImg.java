@@ -1,8 +1,6 @@
 package com.kokochi.tech.dbshard.domain.product;
 
 import com.kokochi.tech.dbshard.domain.product.enumType.ProductImgType;
-import com.kokochi.tech.dbshard.domain.product.enumType.ProductSeasonType;
-import com.kokochi.tech.dbshard.domain.product.enumType.ProductType;
 import com.kokochi.tech.dbshard.domain.user.User;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,7 +21,7 @@ public class ProductImg {
     private Long productImgId;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @Column(nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @Enumerated(EnumType.STRING)

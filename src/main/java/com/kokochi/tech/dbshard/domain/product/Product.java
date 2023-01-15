@@ -38,7 +38,7 @@ public class Product {
     @Column(nullable = false)
     private LocalDateTime regDate;
 
-    @OneToMany(mappedBy = "productImgId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product")
     private List<ProductImg> productImgList = new ArrayList<>();
 
     public Product createProduct(ProductType productType, ProductSeasonType productSeasonType, String title, String director) {
