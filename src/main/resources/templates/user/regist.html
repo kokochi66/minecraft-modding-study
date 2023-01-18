@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns="http://www.w3.org/1999/html"
+        layout:decorate="~{layout/layout}">
+<th:block layout:fragment="css"> </th:block>
+<th:block layout:fragment="script"> </th:block>
+
+<div layout:fragment="content">
+
+    <div class="bd-examples-snippet bd-code-snippet">
+        <div class="container">
+            <div class="d-flex flex-row">
+                <div class="p-2">
+                    <p class="h1">회원가입</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 인기 이미지 목록 -->
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <form class="needs-validation" novalidate="">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="userId" class="form-label">아이디</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="userId" placeholder="userId" required="">
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="userName" class="form-label">닉네임</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="userName" placeholder="userName" required="">
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <label for="password" class="form-label">비밀번호</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" placeholder="director" required="">
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <label for="password-confirm" class="form-label">비밀번호 확인</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password-confirm" placeholder="director" required="">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <button class="w-100 btn btn-primary btn-lg" type="submit">회원가입</button>
+            </form>
+        </div>
+    </div>
+</div>
+</html>
