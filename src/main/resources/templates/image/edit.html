@@ -22,26 +22,24 @@
     <!-- 인기 이미지 목록 -->
     <div class="album py-5 bg-light">
         <div class="container">
-            <form class="needs-validation" novalidate="">
+            <form class="needs-validation" method="post" action="/image/add" enctype="multipart/form-data">
                 <div class="row g-3">
-
                     <div class="col-12">
                         <label for="imageFile" class="form-label">이미지 업로드</label>
-                        <input type="file" class="form-control" id="imageFile">
+                        <input type="file" class="form-control" id="imageFile" name="imageFile">
                     </div>
 
                     <div class="col-12">
-                        <label for="imageName" class="form-label">이미지 이름</label>
+                        <label for="productImgTitle" class="form-label">짤방 소개</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="imageName" placeholder="imageName" required="">
+                            <input type="text" class="form-control" id="productImgTitle" name="productImgTitle" placeholder="짤방을 소개하세요" required="">
                         </div>
                     </div>
 
                     <div class="col-6">
                         <label for="product" class="form-label">작품 </label>
-                        <select class="form-select" id="product" required="">
-<!--                            <option th:each="productType : ${productTypeList}" th:value="${productType}" th:text="${productType}" ></option>-->
-                            <option value="0">봇치더록</option>
+                        <select class="form-select" id="product" name="productId" required="">
+                            <option th:each="product : ${productList}" th:value="${product.productId}" th:text="${product.productTitle}" ></option>
                         </select>
                     </div>
                 </div>

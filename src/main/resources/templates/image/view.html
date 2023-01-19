@@ -12,11 +12,11 @@
     <div class="album py-5 bg-light">
         <div class="container">
             <div class="text-center">
-                <img src="/img/bocchi3.gif" class="rounded" alt="봇치">
+                <img th:src="'/files/' + ${image.productImgUrl}" class="rounded" th:alt="${image.productImgTitle}">
 
                 <hr class="py-2">
 
-                <p class="h3">발작하는 봇치</p>
+                <p class="h3" th:text="${image.productImgTitle}"></p>
             </div>
         </div>
     </div>

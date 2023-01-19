@@ -1,6 +1,5 @@
-package com.kokochi.tech.dbshard.service.repository.product;
+package com.kokochi.tech.dbshard.service.product.repository;
 
-import com.kokochi.tech.dbshard.domain.product.Product;
 import com.kokochi.tech.dbshard.domain.product.ProductImg;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

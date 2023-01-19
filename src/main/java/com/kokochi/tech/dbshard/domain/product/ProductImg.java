@@ -7,6 +7,8 @@ import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,14 +16,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Builder
+@ToString(of = {"productImgId", "productImgType", "productImgTitle", "productImgUrl"})
 @Table(name = "ds_product_img")
 public class ProductImg {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productImgId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "product_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "productId")
     private Product product;
 
     @Enumerated(EnumType.STRING)
@@ -36,5 +39,8 @@ public class ProductImg {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User uploadUser;
+
+    @Transient
+    private List<ProductImgScore> productImgScoreList = new ArrayList<>();
 
 }

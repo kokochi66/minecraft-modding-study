@@ -22,32 +22,32 @@
     <!-- 인기 이미지 목록 -->
     <div class="album py-5 bg-light">
         <div class="container">
-            <form class="needs-validation" novalidate="">
+            <form class="needs-validation" method="post" action="/product/add">
                 <div class="row g-3">
                     <div class="col-12">
-                        <label for="title" class="form-label">작품명</label>
+                        <label for="productTitle" class="form-label">작품명</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="title" placeholder="title" required="">
+                            <input type="text" class="form-control" id="productTitle" name="productTitle" placeholder="title" required="">
                         </div>
                     </div>
 
                     <div class="col-12">
-                        <label for="director" class="form-label">감독</label>
+                        <label for="productDirector" class="form-label">감독</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="director" placeholder="director" required="">
+                            <input type="text" class="form-control" id="productDirector" name="productDirector" placeholder="director" required="">
                         </div>
                     </div>
 
                     <div class="col-md-5">
                         <label for="productType" class="form-label">작품 타입</label>
-                        <select class="form-select" id="productType" required="">
+                        <select class="form-select" id="productType" name="productType" required="">
                             <option th:each="productType : ${productTypeList}" th:value="${productType}" th:text="${productType}" ></option>
                         </select>
                     </div>
 
                     <div class="col-md-4">
-                        <label for="productSeason" class="form-label">시즌</label>
-                        <select class="form-select" id="productSeason" required="">
+                        <label for="productSeasonType" class="form-label">시즌</label>
+                        <select class="form-select" id="productSeasonType" name="productSeasonType" required="">
                             <option th:each="productSeason : ${productSeasonTypeList}" th:value="${productSeason}" th:text="${productSeason}"></option>
                         </select>
                     </div>

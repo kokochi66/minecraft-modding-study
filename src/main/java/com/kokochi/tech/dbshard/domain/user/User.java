@@ -1,6 +1,7 @@
 package com.kokochi.tech.dbshard.domain.user;
 
 import com.kokochi.tech.dbshard.domain.product.ProductImg;
+import com.kokochi.tech.dbshard.domain.product.ProductImgScore;
 import com.kokochi.tech.dbshard.domain.product.enumType.ProductSeasonType;
 import com.kokochi.tech.dbshard.domain.product.enumType.ProductType;
 import lombok.*;
@@ -17,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Builder
+@ToString(of = {"userId", "userName"})
 @Table(name = "ds_user")
 public class User {
 
@@ -24,11 +26,15 @@ public class User {
     private Long userId;
 
     private String userName;
+    private String password;
 
     @CreatedDate
     private LocalDateTime regDate;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "uploadUser")
     private List<ProductImg> productImgList = new ArrayList<>();
+
+    @Transient
+    private List<ProductImgScore> productImgScoreList = new ArrayList<>();
 
 }

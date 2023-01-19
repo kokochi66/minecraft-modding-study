@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Builder
+@ToString(of = {"productId", "productType", "productSeasonType", "productTitle", "productDirector", "regDate"})
 @Table(name = "ds_product")
 public class Product {
 
