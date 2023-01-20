@@ -5,10 +5,9 @@ import org.springframework.test.annotation.Rollback;
 
 import javax.transaction.Transactional;
 
-@SpringBootTest
 @Rollback(false)
 @Transactional
-public class SearchScenarioTest {
+public class SearchScenarioTest extends AbstractScenarioTest {
 
     // 사용자의 이미지 검색 (페이징)
 

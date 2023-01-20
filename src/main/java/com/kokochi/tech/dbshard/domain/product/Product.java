@@ -42,7 +42,10 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<ProductImg> productImgList = new ArrayList<>();
 
-    public Product createProduct(ProductType productType, ProductSeasonType productSeasonType, String title, String director) {
+    @Transient
+    private int imgScore;
+
+    public static Product createProduct(ProductType productType, ProductSeasonType productSeasonType, String title, String director) {
         return Product.builder()
                 .productType(productType)
                 .productSeasonType(productSeasonType)

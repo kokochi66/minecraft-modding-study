@@ -43,4 +43,17 @@ public class ProductImg {
     @Transient
     private List<ProductImgScore> productImgScoreList = new ArrayList<>();
 
+    @Transient
+    private Double scoreAvg;
+
+    public static ProductImg createProductImg(Product product, ProductImgType productImgType, String productImgTitle, String productImgUrl, User uploadUser) {
+        return ProductImg.builder()
+                .product(product)
+                .productImgType(productImgType)
+                .productImgTitle(productImgTitle)
+                .productImgUrl(productImgUrl)
+                .regDate(LocalDateTime.now())
+                .uploadUser(uploadUser)
+                .build();
+    }
 }

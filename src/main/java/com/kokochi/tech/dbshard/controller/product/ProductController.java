@@ -27,7 +27,7 @@ public class ProductController {
 
     @PostMapping("/add")
     public String addProduct(@ModelAttribute ProductDto productDto) {
-        Long savedProductId = productService.insertProduct(productDto.convertProduct());
+        productService.insertProduct(productDto.convertProduct());
         return "redirect:/";
     }
 }

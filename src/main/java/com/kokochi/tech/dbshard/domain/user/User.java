@@ -37,4 +37,12 @@ public class User {
     @Transient
     private List<ProductImgScore> productImgScoreList = new ArrayList<>();
 
+
+    public static User createUser(String userName, String password) {
+        return User.builder()
+                .userName(userName)
+                .password(password)
+                .regDate(LocalDateTime.now())
+                .build();
+    }
 }

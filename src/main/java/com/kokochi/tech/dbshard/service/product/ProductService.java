@@ -1,15 +1,18 @@
 package com.kokochi.tech.dbshard.service.product;
 
 import com.kokochi.tech.dbshard.domain.product.Product;
-import com.kokochi.tech.dbshard.service.product.repository.ProductImgRepository;
+import com.kokochi.tech.dbshard.domain.product.enumType.ProductSeasonType;
+import com.kokochi.tech.dbshard.domain.product.enumType.ProductType;
 import com.kokochi.tech.dbshard.service.product.repository.ProductRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -17,15 +20,14 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public Long insertProduct(Product product) {
+    public Product insertProduct(Product product) {
         product.setRegDate(LocalDateTime.now());
         return upsertProduct(product);
     }
 
     @Transactional
-    public Long upsertProduct(Product product) {
-        Product savedProduct = productRepository.save(product);
-        return savedProduct.getProductId();
+    public Product upsertProduct(Product product) {
+        return productRepository.save(product);
     }
 
     public Product getProductById(Long id) {
@@ -36,7 +38,25 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    // 검색 기능 추가
-    // 페이징
-    // 다양한 조건 필터링
+    public void deleteProduct(Product product) {
+        productRepository.delete(product);
+    }
+
+    // 작품 타입별 조회
+    public Page<Product> getProductByProductTypePage(ProductType productType, int size, int offset) {
+        PageRequest pageRequest = PageRequest.of(offset, size, Sort.by(Sort.Direction.ASC, "productTitle"));
+        return productRepository.findByProductType(productType, pageRequest);
+    }
+
+    // 작품 시즌별 조회
+    public Page<Product> getProductByProductSeasonPage(ProductSeasonType productSeasonType, int size, int offset) {
+        PageRequest pageRequest = PageRequest.of(offset, size, Sort.by(Sort.Direction.ASC, "productTitle"));
+        return productRepository.findByProductSeasonType(productSeasonType, pageRequest);
+    }
+
+    // 작품 이름 조회
+    public Page<Product> getProductByProductTitlePage(String productTitle, int size, int offset) {
+        PageRequest pageRequest = PageRequest.of(offset, size, Sort.by(Sort.Direction.ASC, "productTitle"));
+        return productRepository.findByProductTitleContains(productTitle, pageRequest);
+    }
 }
