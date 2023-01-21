@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ProductImgRepository extends JpaRepository<ProductImg, Long> {
 
@@ -15,13 +17,17 @@ public interface ProductImgRepository extends JpaRepository<ProductImg, Long> {
             " from ProductImgScore ps left join ProductImg pi on pi.productImgId = ps.productImgId" +
             " group by ps.productImgId" +
             " order by (sum(ps.score) / count(ps.score)) desc")
-    Page<ProductImg> findByPaging(Pageable pageable);
+    Page<ProductImg> findByHotListPaging(Pageable pageable);
 
     @Query("select pi " +
             " from ProductImgScore ps left join ProductImg pi on pi.productImgId = ps.productImgId" +
             " where pi.uploadUser = :user" +
             " group by ps.productImgId" +
             " order by (sum(ps.score) / count(ps.score)) desc")
-    Page<ProductImg> findByUploadUserPaging(User user, Pageable pageable);
+    Page<ProductImg> findByUploadUserHotListPaging(User user, Pageable pageable);
 
+
+    Page<ProductImg> findByProductImgTitleContains(String productImgTitle, Pageable pageable);
+
+    List<ProductImg> findAllByProductImgIdIsGreaterThan(Long productImgId);
 }

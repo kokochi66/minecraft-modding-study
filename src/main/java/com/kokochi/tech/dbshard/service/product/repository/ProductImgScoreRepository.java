@@ -13,4 +13,6 @@ public interface ProductImgScoreRepository extends JpaRepository<ProductImgScore
     List<ProductImgScore> findAllByProductImgId(Long productImgId);
 
     List<ProductImgScore> findAllByUserId(Long userId);
+
+
 }

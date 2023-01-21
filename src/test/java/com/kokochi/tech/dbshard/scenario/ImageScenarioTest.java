@@ -9,14 +9,11 @@ import com.kokochi.tech.dbshard.service.product.ProductImgService;
 import com.kokochi.tech.dbshard.service.product.ProductService;
 import com.kokochi.tech.dbshard.service.product.repository.ProductImgRepository;
 import com.kokochi.tech.dbshard.service.product.repository.ProductImgScoreRepository;
-import com.kokochi.tech.dbshard.service.user.UserService;
 import com.kokochi.tech.dbshard.service.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 
 import javax.transaction.Transactional;
@@ -38,7 +35,7 @@ public class ImageScenarioTest extends AbstractScenarioTest {
     void 이미지_사용자별_조회() {
         User user = userRepository.findById(2L).orElseThrow();
         PageRequest pageRequest = PageRequest.of(0, 10);
-        Page<ProductImg> res = productImgRepository.findByUploadUserPaging(user, pageRequest);
+        Page<ProductImg> res = productImgRepository.findByUploadUserHotListPaging(user, pageRequest);
         for (ProductImg img : res) {
             System.out.println("TEST :: img = " + img);
         }
@@ -49,7 +46,7 @@ public class ImageScenarioTest extends AbstractScenarioTest {
     void 이미지_인기별_조회() {
         User user = userRepository.findById(2L).orElseThrow();
         PageRequest pageRequest = PageRequest.of(0, 10);
-        Page<ProductImg> res = productImgRepository.findByPaging(pageRequest);
+        Page<ProductImg> res = productImgRepository.findByHotListPaging(pageRequest);
         for (ProductImg img : res) {
             System.out.println("TEST :: img = " + img);
         }
