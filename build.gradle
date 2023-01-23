@@ -25,6 +25,8 @@ dependencies {
 	implementation 'mysql:mysql-connector-java'
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 
+	implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
+
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

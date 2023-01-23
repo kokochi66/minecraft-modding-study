@@ -5,6 +5,7 @@ import com.kokochi.tech.dbshard.shard.router.DataSourceRouter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,9 +24,9 @@ import java.util.logging.Logger;
 
 @Configuration
 @EnableJpaRepositories
-@ConfigurationProperties(prefix = "datasource")
 public class UserConfig {
 
+    @Autowired
     private ShardingDataSourceProperty user;
     private final String SHARD_DELIMITER = "_";
 
@@ -33,7 +34,7 @@ public class UserConfig {
     public DataSource userDataSource() {
         DataSourceRouter router = new DataSourceRouter();
         Map<Object, Object> datasourceMap = new LinkedHashMap<>();
-
+        
         for (int i= 0;i< user.getShards().size(); i++) {
             ShardingDataSourceProperty.Shard shard = user.getShards().get(i);
 
