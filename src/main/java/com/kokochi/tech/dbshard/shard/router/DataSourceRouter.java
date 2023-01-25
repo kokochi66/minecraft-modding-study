@@ -25,6 +25,7 @@ public class DataSourceRouter extends AbstractRoutingDataSource {
 
     @Override
     public void setTargetDataSources(Map<Object, Object> targetDataSources) {
+        System.out.println("TEST :: DataSourceRouter - setTargetDataSources() :: 1");
         super.setTargetDataSources(targetDataSources);
 
         shards = new HashMap<>();
@@ -40,31 +41,40 @@ public class DataSourceRouter extends AbstractRoutingDataSource {
                 shard.getSlaveName().add(dataSourceName);
             }
         }
+        System.out.println("TEST :: DataSourceRouter - setTargetDataSources() :: 2");
     }
 
     @Override
     protected Object determineCurrentLookupKey() {
+        System.out.println("TEST :: DataSourceRouter - determineCurrentLookupKey() :: 1");
         int shardNo = getShardNo(UserHolder.getSharding());
         MhaDataSource dataSource = shards.get(shardNo);
+        System.out.println("TEST :: DataSourceRouter - determineCurrentLookupKey() :: 2 :: dataSource MasterName = " + dataSource.getMasterName());
+        dataSource.getSlaveName().getList().forEach(s -> {
+            System.out.println("TEST :: DataSourceRouter - determineCurrentLookupKey() :: 2 :: dataSource slaveNames = " + s);
+        });
         return TransactionSynchronizationManager.isCurrentTransactionReadOnly() ? dataSource.getSlaveName().next() : dataSource.getMasterName();
     }
 
     private MhaDataSource getShard(String shardNoStr) {
+        System.out.println("TEST :: DataSourceRouter - getShard() :: 1");
         int shardNo = 0;
         if (StringUtils.isStrictlyNumeric(shardNoStr)) {
             shardNo = Integer.parseInt(shardNoStr);
         }
-
+        System.out.println("TEST :: DataSourceRouter - getShard() :: 2");
         MhaDataSource shard = shards.get(shardNo);
         if (shard == null) {
             shard = new MhaDataSource();
             shard.setSlaveName(new RoundRobin<>(new ArrayList<>()));
             shards.put(shardNo, shard);
         }
+        System.out.println("TEST :: DataSourceRouter - getShard() :: 3");
         return shard;
     }
 
     private int getShardNo(UserHolder.Sharding sharding) {
+        System.out.println("TEST :: DataSourceRouter - getShardNo() :: 1");
         if (sharding == null) {
             return 0;
         }
@@ -76,10 +86,12 @@ public class DataSourceRouter extends AbstractRoutingDataSource {
         } else if (shardingProperty.getStrategy() == ShardingStrategy.MODULAR) {
             shardNo = getShardNoByModular(shardingProperty.getMod(), sharding.getShardKey());
         }
+        System.out.println("TEST :: DataSourceRouter - getShardNo() :: 2 :: shardNo = " + shardNo);
         return shardNo;
     }
 
     private int getShardNoByRange(List<ShardingProperty.ShardingRule> rules, long shardKey) {
+        System.out.println("TEST :: DataSourceRouter - getShardNoByRange() :: 1");
         for (ShardingProperty.ShardingRule rule : rules) {
             if (rule.getRangeMin() <= shardKey && shardKey <= rule.getRangeMax()) {
                 return rule.getShardNo();
@@ -89,6 +101,7 @@ public class DataSourceRouter extends AbstractRoutingDataSource {
     }
 
     private int getShardNoByModular(int modulus, long shardKey) {
+        System.out.println("TEST :: DataSourceRouter - getShardNoByModular() :: 1");
         return (int) (shardKey % modulus);
     }
 

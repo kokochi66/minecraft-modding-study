@@ -1,4 +1,4 @@
-package com.kokochi.tech.dbshard.shard.repository;
+package com.kokochi.tech.dbshard.service.shard;
 
 import com.kokochi.tech.dbshard.domain.user.User;
 import com.kokochi.tech.dbshard.service.user.repository.UserRepository;
@@ -6,7 +6,6 @@ import com.kokochi.tech.dbshard.shard.annotation.Sharding;
 import com.kokochi.tech.dbshard.shard.enumType.ShardingTarget;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeansException;
-import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
@@ -31,6 +30,6 @@ public class UserRepositoryService implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-
+        System.out.println("TEST :: UserRepositoryService - setApplicationContext() :: 1");
     }
 }

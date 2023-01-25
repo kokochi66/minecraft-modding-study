@@ -1,11 +1,8 @@
 package com.kokochi.tech.dbshard.shard;
 
 import com.kokochi.tech.dbshard.domain.user.User;
-import com.kokochi.tech.dbshard.shard.enumType.ShardingTarget;
-import com.kokochi.tech.dbshard.shard.property.ShardingDataSourceProperty;
 import com.kokochi.tech.dbshard.shard.property.TestProperty;
-import com.kokochi.tech.dbshard.shard.repository.UserRepositoryService;
-import com.kokochi.tech.dbshard.shard.thread.UserHolder;
+import com.kokochi.tech.dbshard.service.shard.UserRepositoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,8 +15,8 @@ public class ShardingTest {
 
     @Test
     void 테스트() {
-//        User testUser = User.createUser("testUser", "1234");
-//        userRepositoryService.save(testUser);
+        User testUser = User.createUser("testUser", "1234");
+        userRepositoryService.save(testUser);
 //        System.out.println("TEST :: user is null = " + (user == null));
 //        if (user != null) {
 //            for (ShardingDataSourceProperty.Shard shard : user.getShards()) {
@@ -38,7 +35,7 @@ public class ShardingTest {
 //            }
 //        }
 
-        UserHolder.setSharding(ShardingTarget.USER, 0L);
+//        UserHolder.setSharding(ShardingTarget.USER, 0L);
 
         System.out.println("TEST :: confirm");
 

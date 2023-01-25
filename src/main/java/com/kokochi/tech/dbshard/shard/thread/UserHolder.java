@@ -10,18 +10,22 @@ public class UserHolder {
     private static final  ThreadLocal<Context> userContext = new ThreadLocal<>();
 
     public static void setSharding(ShardingTarget target, long shardKey) {
+        System.out.println("TEST :: UserHolder - setSharding() :: 1");
         getUserContext().setSharding(new Sharding(target, shardKey));
     }
 
     public static void clearSharding() {
+        System.out.println("TEST :: UserHolder - setSharding() :: 1");
         getUserContext().setSharding(null);
     }
 
     public static Sharding getSharding() {
-        return getUserContext().getSharding();
+        System.out.println("TEST :: UserHolder - getSharding() :: 1");
+        return getUserContext() == null ? null : getUserContext().getSharding();
     }
 
     private static Context getUserContext() {
+        System.out.println("TEST :: UserHolder - getUserContext() :: 1");
         return userContext.get();
     }
 
