@@ -44,15 +44,11 @@ public class UserConfig {
         DataSourceRouter router = new DataSourceRouter();
         Map<Object, Object> datasourceMap = new LinkedHashMap<>();
 
-        for (int i= 0;i< user.getShards().size(); i++) {
-            ShardingDataSourceProperty.Shard shard = user.getShards().get(i);
-            DataSource masterDs = datasource(shard.getUsername(), shard.getPassword(), shard.getMaster().getUrl());
-            datasourceMap.put(i + SHARD_DELIMITER + shard.getMaster().getName(), masterDs);
-
-            for (ShardingDataSourceProperty.Property slave : shard.getSlaves()) {
-                DataSource slaveDs = datasource(shard.getUsername(), shard.getPassword(), slave.getUrl());
-                datasourceMap.put(i + SHARD_DELIMITER + slave.getName(), slaveDs);
-            }
+        DataSource masterDs = datasource(user.getUsername(), user.getPassword(), user.getMaster().getUrl());
+        datasourceMap.put(user.getMaster().getName(), masterDs);
+        for (ShardingDataSourceProperty.Property shard : user.getShards()) {
+            DataSource slaveDs = datasource(user.getUsername(), user.getPassword(), shard.getUrl());
+            datasourceMap.put(shard.getName(), slaveDs);
         }
         System.out.println("TEST :: UserConfig - userDataSource() :: 2");
 

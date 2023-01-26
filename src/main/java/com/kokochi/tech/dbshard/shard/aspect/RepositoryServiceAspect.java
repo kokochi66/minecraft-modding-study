@@ -15,18 +15,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RepositoryServiceAspect {
 
-
     @Pointcut("execution(public * com.kokochi.tech.dbshard.service..*.*(..))")
     private void repositoryService() {
-
+        System.out.println("TEST :: RepositoryServiceAspect - repositoryService :: 1");
     }
 
     @Around("repositoryService() && @within(sharding) && args(shardKey,..)")
     public Object handler(ProceedingJoinPoint pjp, Sharding sharding, long shardKey) throws Throwable {
         System.out.println("TEST :: RepositoryServiceAspect - handler :: 1");
-        UserHolder.setSharding(sharding.target(), shardKey);
+//        UserHolder.setSharding(sharding.target(), shardKey);
         Object returnVal = pjp.proceed();
-        UserHolder.clearSharding();
+//        UserHolder.clearSharding();
         return returnVal;
     }
 

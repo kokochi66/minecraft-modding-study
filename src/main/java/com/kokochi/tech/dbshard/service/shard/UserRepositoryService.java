@@ -24,7 +24,7 @@ public class UserRepositoryService implements ApplicationContextAware {
 
 
     @Transactional
-    public void save(User user) {
+    public void save(Long userId, User user) {
         userRepository.save(user);
     }
 

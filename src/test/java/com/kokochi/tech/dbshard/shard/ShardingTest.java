@@ -16,7 +16,7 @@ public class ShardingTest {
     @Test
     void 테스트() {
         User testUser = User.createUser("testUser", "1234");
-        userRepositoryService.save(testUser);
+        userRepositoryService.save(10L, testUser);
 //        System.out.println("TEST :: user is null = " + (user == null));
 //        if (user != null) {
 //            for (ShardingDataSourceProperty.Shard shard : user.getShards()) {
