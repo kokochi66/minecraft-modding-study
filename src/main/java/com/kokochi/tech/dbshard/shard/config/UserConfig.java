@@ -45,7 +45,7 @@ public class UserConfig {
                 DataSource slaveDs = datasource(shard.getUsername(), shard.getPassword(), slave.getUrl());
                 datasourceMap.put(i + SHARD_DELIMITER + slave.getName(), slaveDs);
 
-                
+
             }
         }
 
