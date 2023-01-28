@@ -17,7 +17,7 @@ import java.util.List;
 @Entity
 @Builder
 @ToString(of = {"productId", "productType", "productSeasonType", "productTitle", "productDirector", "regDate"})
-@Table(name = "ds_product")
+@Table(name = "dsm_product")
 public class Product {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

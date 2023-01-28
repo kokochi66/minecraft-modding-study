@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 //@Component
-@Configuration
-@EnableJpaRepositories(basePackages = "com.kokochi.tech.dbshard.service")
+//@Configuration
+//@EnableJpaRepositories(basePackages = "com.kokochi.tech.dbshard.service")
 public class UserConfig {
 
     @Autowired

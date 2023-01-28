@@ -8,9 +8,9 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties(prefix = "sharding")
-@Setter
+//@Configuration
+//@ConfigurationProperties(prefix = "sharding")
+//@Setter
 public class UserShardingConfig {
 
     private ShardingProperty user;

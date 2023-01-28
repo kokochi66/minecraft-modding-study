@@ -17,7 +17,7 @@ import java.util.List;
 @Entity
 @Builder
 @ToString(of = {"productImgId", "productImgType", "productImgTitle", "productImgUrl"})
-@Table(name = "ds_product_img")
+@Table(name = "dss_product_img")
 public class ProductImg {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

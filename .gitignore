@@ -37,3 +37,4 @@ out/
 .vscode/
 src/main/resources/static/img/
 src/main/resources/application-datasource.properties
+src/main/resources/application-shard.properties

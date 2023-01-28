@@ -19,7 +19,7 @@ import java.util.List;
 @Entity
 @Builder
 @ToString(of = {"userId", "userName"})
-@Table(name = "ds_user")
+@Table(name = "dss_user")
 public class User {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

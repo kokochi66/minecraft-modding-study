@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Builder
 @ToString
 @IdClass(ProductImgScorePK.class)
-@Table(name = "ds_product_img_score", indexes =  {
+@Table(name = "dss_product_img_score", indexes =  {
         @Index(name = "idx_product_img_id", columnList = "productImgId"),
         @Index(name = "idx_user_id", columnList = "userId"),
 })

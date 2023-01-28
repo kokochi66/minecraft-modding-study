@@ -53,7 +53,7 @@ public class DataSourceRouter extends AbstractRoutingDataSource {
         System.out.println("TEST :: DataSourceRouter - determineCurrentLookupKey() :: 3 :: TransactionReadOnly :: " + TransactionSynchronizationManager.isCurrentTransactionReadOnly());
         System.out.println("TEST :: DataSourceRouter - determineCurrentLookupKey() :: 3 :: getCurrentTransactionName :: " + TransactionSynchronizationManager.getCurrentTransactionName());
         Map<Object, Object> resourceMap = TransactionSynchronizationManager.getResourceMap();
-        TransactionSynchronizationManager.
+
         for (Object o : resourceMap.keySet()) {
             System.out.println("TEST :: DataSourceRouter - determineCurrentLookupKey() :: 4 :: resource = " + o);
         }

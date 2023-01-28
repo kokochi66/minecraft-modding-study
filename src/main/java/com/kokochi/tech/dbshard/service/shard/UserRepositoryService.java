@@ -2,7 +2,7 @@ package com.kokochi.tech.dbshard.service.shard;
 
 import com.kokochi.tech.dbshard.domain.user.User;
 import com.kokochi.tech.dbshard.service.user.repository.UserRepository;
-import com.kokochi.tech.dbshard.shard.annotation.Sharding;
+import com.kokochi.tech.dbshard.shard.annotation.ShardingRepository;
 import com.kokochi.tech.dbshard.shard.enumType.ShardingTarget;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeansException;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 //@CacheConfig(cacheManager = "userCacheManager")
 @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW, readOnly = true)
-@Sharding(target = ShardingTarget.USER)
+@ShardingRepository(target = ShardingTarget.USER)
 @RequiredArgsConstructor
 public class UserRepositoryService implements ApplicationContextAware {
 

@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "ds_user_history", indexes = {
+@Table(name = "dss_user_history", indexes = {
         @Index(name = "idx_user", columnList = "userId")
 })
 public class UserHistory {

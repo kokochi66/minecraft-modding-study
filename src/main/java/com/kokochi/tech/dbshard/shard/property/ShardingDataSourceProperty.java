@@ -15,6 +15,12 @@ public class ShardingDataSourceProperty {
 
     private String username;
     private String password;
+    private String driver;
+    private Boolean showSql;
+    private String ddlAuto;
+    private String naming;
+
+
     private Property master;
     private List<Property> shards;
 

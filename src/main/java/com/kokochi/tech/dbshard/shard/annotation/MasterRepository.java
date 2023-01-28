@@ -9,6 +9,5 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Sharding {
-    ShardingTarget target();
+public @interface MasterRepository {
 }
