@@ -13,16 +13,10 @@ import java.util.List;
 @ConfigurationProperties(prefix = "datasource.user")
 public class ShardingDataSourceProperty {
 
-    private List<Shard> shards;
-
-    @Getter
-    @Setter
-    public static class Shard {
-        private String username;
-        private String password;
-        private Property master;
-        private List<Property> slaves;
-    }
+    private String username;
+    private String password;
+    private Property master;
+    private List<Property> shards;
 
     @Getter
     @Setter

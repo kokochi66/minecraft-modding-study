@@ -12,6 +12,7 @@ public class ShardingConfig {
     private static Map<ShardingTarget, ShardingProperty> shardingPropertyMap = new ConcurrentHashMap<>();
 
     public static Map<ShardingTarget, ShardingProperty> getShardingPropertyMap() {
+        System.out.println("TEST :: ShardingConfig - getShardingPropertyMap() :: 1");
         return shardingPropertyMap;
     }
 }

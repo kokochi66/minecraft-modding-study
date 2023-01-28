@@ -17,6 +17,7 @@ public class UserShardingConfig {
 
     @PostConstruct
     public void init() {
+        System.out.println("TEST :: UserShardingConfig - init() :: 1");
         ShardingConfig.getShardingPropertyMap().put(ShardingTarget.USER, user);
     }
 }
