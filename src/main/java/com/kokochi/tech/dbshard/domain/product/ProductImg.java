@@ -1,6 +1,7 @@
 package com.kokochi.tech.dbshard.domain.product;
 
 import com.kokochi.tech.dbshard.domain.product.enumType.ProductImgType;
+import com.kokochi.tech.dbshard.domain.shard.ShardKey;
 import com.kokochi.tech.dbshard.domain.user.User;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -18,7 +19,7 @@ import java.util.List;
 @Builder
 @ToString(of = {"productImgId", "productImgType", "productImgTitle", "productImgUrl"})
 @Table(name = "dss_product_img")
-public class ProductImg {
+public class ProductImg implements ShardKey {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productImgId;
@@ -55,5 +56,10 @@ public class ProductImg {
                 .regDate(LocalDateTime.now())
                 .uploadUser(uploadUser)
                 .build();
+    }
+
+    @Override
+    public String getUserId() {
+        return uploadUser.getUserId();
     }
 }

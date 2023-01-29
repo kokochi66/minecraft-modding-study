@@ -1,6 +1,5 @@
 package com.kokochi.tech.dbshard.service.product;
 
-import com.kokochi.tech.dbshard.domain.product.Product;
 import com.kokochi.tech.dbshard.domain.product.ProductImg;
 import com.kokochi.tech.dbshard.domain.product.ProductImgScore;
 import com.kokochi.tech.dbshard.domain.product.enumType.ProductImgType;

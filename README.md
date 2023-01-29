@@ -15,6 +15,7 @@
 - https://sophia2730.tistory.com/entry/Databases-Database-Sharding%EC%83%A4%EB%94%A9
 - https://nesoy.github.io/articles/2018-05/Database-Shard
 - https://sg-choi.tistory.com/570
+- https://supawer0728.github.io/2018/05/06/spring-boot-multiple-datasource/
 
 구현 방식에 대해서는 따로 스터디 후 정리할 예정
 

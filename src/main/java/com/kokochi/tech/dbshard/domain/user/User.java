@@ -2,8 +2,7 @@ package com.kokochi.tech.dbshard.domain.user;
 
 import com.kokochi.tech.dbshard.domain.product.ProductImg;
 import com.kokochi.tech.dbshard.domain.product.ProductImgScore;
-import com.kokochi.tech.dbshard.domain.product.enumType.ProductSeasonType;
-import com.kokochi.tech.dbshard.domain.product.enumType.ProductType;
+import com.kokochi.tech.dbshard.domain.shard.ShardKey;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -20,10 +19,10 @@ import java.util.List;
 @Builder
 @ToString(of = {"userId", "userName"})
 @Table(name = "dss_user")
-public class User {
+public class User implements ShardKey {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    @Id
+    private String userId;
 
     private String userName;
     private String password;

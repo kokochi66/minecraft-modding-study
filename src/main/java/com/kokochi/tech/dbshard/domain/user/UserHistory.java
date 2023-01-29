@@ -2,6 +2,7 @@ package com.kokochi.tech.dbshard.domain.user;
 
 import com.kokochi.tech.dbshard.domain.product.ProductImg;
 import com.kokochi.tech.dbshard.domain.product.ProductImgScore;
+import com.kokochi.tech.dbshard.domain.shard.ShardKey;
 import com.kokochi.tech.dbshard.domain.user.enumType.UserHistoryType;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -20,7 +21,7 @@ import java.util.List;
 @Table(name = "dss_user_history", indexes = {
         @Index(name = "idx_user", columnList = "userId")
 })
-public class UserHistory {
+public class UserHistory implements ShardKey {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long historyId;
@@ -38,4 +39,9 @@ public class UserHistory {
 
     @CreatedDate
     private LocalDateTime regDate;
+
+    @Override
+    public String getUserId() {
+        return user.getUserId();
+    }
 }

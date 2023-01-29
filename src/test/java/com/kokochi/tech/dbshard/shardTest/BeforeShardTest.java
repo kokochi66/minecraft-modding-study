@@ -20,11 +20,6 @@ import org.springframework.test.annotation.Rollback;
 
 import javax.transaction.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @Transactional
 public class BeforeShardTest extends AbstractScenarioTest {
 
@@ -136,7 +131,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 내 이미지 조회 (10개)
     @Test
     void 내_이미지_조회_10() {
-        User user = userService.getUserById(1L);
+        User user = userService.getUserById("");
         Page<ProductImg> p = productImgService.getProductImgListByUserHotList(user, 10, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
@@ -151,7 +146,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 내 이미지 조회 (100개)
     @Test
     void 내_이미지_조회_100() {
-        User user = userService.getUserById(1L);
+        User user = userService.getUserById("");
         Page<ProductImg> p = productImgService.getProductImgListByUserHotList(user, 100, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
@@ -162,7 +157,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 내 이미지 조회 (1000개)
     @Test
     void 내_이미지_조회_1000() {
-        User user = userService.getUserById(1L);
+        User user = userService.getUserById("");
         Page<ProductImg> p = productImgService.getProductImgListByUserHotList(user, 1000, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
@@ -176,7 +171,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     @Rollback(false)
     void 이미지_추가() {
         Product product = productRepository.findById(1L).orElseThrow();
-        User user = userRepository.findById(1L).orElseThrow();
+        User user = userRepository.findById("").orElseThrow();
         productImgService.upsertProductImg(ProductImg.createProductImg(product, ProductImgType.JPG, "testImg_" + 0, "test", user));
 
     }
@@ -186,7 +181,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     @Test
     @Rollback(false)
     void 평가_추가() {
-        User user = userRepository.findById(2L).orElseThrow();
+        User user = userRepository.findById("").orElseThrow();
 //        List<ProductImg> img = productImgRepository.findAllByProductImgIdIsGreaterThan(1000002L);
         ProductImg img = productImgRepository.findById(1000006L).orElseThrow();
         productImgScoreRepository.save(

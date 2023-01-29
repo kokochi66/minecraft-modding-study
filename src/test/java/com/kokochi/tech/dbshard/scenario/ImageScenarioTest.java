@@ -33,7 +33,7 @@ public class ImageScenarioTest extends AbstractScenarioTest {
     // 사용자가 올린 이미지 조회 (페이징)
     @Test
     void 이미지_사용자별_조회() {
-        User user = userRepository.findById(2L).orElseThrow();
+        User user = userRepository.findById("").orElseThrow();
         PageRequest pageRequest = PageRequest.of(0, 10);
         Page<ProductImg> res = productImgRepository.findByUploadUserHotListPaging(user, pageRequest);
         for (ProductImg img : res) {
@@ -44,7 +44,7 @@ public class ImageScenarioTest extends AbstractScenarioTest {
     // 인기 이미지 조회 (페이징)
     @Test
     void 이미지_인기별_조회() {
-        User user = userRepository.findById(2L).orElseThrow();
+        User user = userRepository.findById("").orElseThrow();
         PageRequest pageRequest = PageRequest.of(0, 10);
         Page<ProductImg> res = productImgRepository.findByHotListPaging(pageRequest);
         for (ProductImg img : res) {
