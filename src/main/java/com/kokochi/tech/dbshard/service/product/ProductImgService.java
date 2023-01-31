@@ -3,20 +3,22 @@ package com.kokochi.tech.dbshard.service.product;
 import com.kokochi.tech.dbshard.domain.product.ProductImg;
 import com.kokochi.tech.dbshard.domain.product.ProductImgScore;
 import com.kokochi.tech.dbshard.domain.product.enumType.ProductImgType;
+import com.kokochi.tech.dbshard.domain.shard.ShardNo;
 import com.kokochi.tech.dbshard.domain.user.User;
 import com.kokochi.tech.dbshard.service.file.FileService;
 import com.kokochi.tech.dbshard.service.product.repository.ProductImgRepository;
 import com.kokochi.tech.dbshard.service.product.repository.ProductImgScoreRepository;
+import com.kokochi.tech.dbshard.shard.annotation.ShardService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Service
+@ShardService
 @AllArgsConstructor
 public class ProductImgService {
 
@@ -44,27 +46,8 @@ public class ProductImgService {
         return savedProductImg.getProductImgId();
     }
 
-    public ProductImg getProductImgById(Long id) {
-        return productImgRepository.findById(id).orElse(null);
-    }
-
-
-    // 인기 이미지 조회
-    public Page<ProductImg> getProductImgListByHotList(int size, int offset) {
-        PageRequest pageRequest = PageRequest.of(offset, size);
-        return productImgRepository.findByHotListPaging(pageRequest);
-    }
-
-    // 검색 조회 (이름순)
-    public Page<ProductImg> getProductImgListBySearchList(String searchCondition, int size, int offset) {
-        PageRequest pageRequest = PageRequest.of(offset, size);
-        return productImgRepository.findByProductImgTitleContains(searchCondition, pageRequest);
-    }
-
-    // 특정 사용자의 이미지 조회
-    public Page<ProductImg> getProductImgListByUserHotList(User user, int size, int offset) {
-        PageRequest pageRequest = PageRequest.of(offset, size);
-        return productImgRepository.findByUploadUserHotListPaging(user, pageRequest);
+    public List<ProductImg> getProductImgByUserId(User user) {
+        return productImgRepository.findAllByUploadUser(user);
     }
 
     // 이미지 평가 수정
@@ -72,6 +55,22 @@ public class ProductImgService {
         return productImgScoreRepository.save(productImgScore);
     }
 
+    // 인기 이미지 조회
+    protected Page<ProductImg> getProductImgListByHotList(ShardNo shardNo, int size, int offset) {
+        PageRequest pageRequest = PageRequest.of(offset, size);
+        return productImgRepository.findByHotListPaging(pageRequest);
+    }
 
+    // 검색 조회 (이름순)
+    protected Page<ProductImg> getProductImgListBySearchList(ShardNo shardNo, String searchCondition, int size, int offset) {
+        PageRequest pageRequest = PageRequest.of(offset, size);
+        return productImgRepository.findByProductImgTitleContains(searchCondition, pageRequest);
+    }
+
+    // 특정 사용자의 이미지 조회
+    protected Page<ProductImg> getProductImgListByUserHotList(ShardNo shardNo, User user, int size, int offset) {
+        PageRequest pageRequest = PageRequest.of(offset, size);
+        return productImgRepository.findByUploadUserHotListPaging(user, pageRequest);
+    }
 
 }

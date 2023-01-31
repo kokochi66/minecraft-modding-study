@@ -1,7 +1,7 @@
 package com.kokochi.tech.dbshard.domain.product;
 
 import com.kokochi.tech.dbshard.domain.product.enumType.ProductImgType;
-import com.kokochi.tech.dbshard.domain.shard.ShardKey;
+import com.kokochi.tech.dbshard.domain.shard.ShardKeyObject;
 import com.kokochi.tech.dbshard.domain.user.User;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -19,7 +19,7 @@ import java.util.List;
 @Builder
 @ToString(of = {"productImgId", "productImgType", "productImgTitle", "productImgUrl"})
 @Table(name = "dss_product_img")
-public class ProductImg implements ShardKey {
+public class ProductImg implements ShardKeyObject {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productImgId;
@@ -38,8 +38,7 @@ public class ProductImg implements ShardKey {
     @CreatedDate
     private LocalDateTime regDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User uploadUser;
+    private String uploadUser;
 
     @Transient
     private List<ProductImgScore> productImgScoreList = new ArrayList<>();
@@ -47,7 +46,7 @@ public class ProductImg implements ShardKey {
     @Transient
     private Double scoreAvg;
 
-    public static ProductImg createProductImg(Product product, ProductImgType productImgType, String productImgTitle, String productImgUrl, User uploadUser) {
+    public static ProductImg createProductImg(Product product, ProductImgType productImgType, String productImgTitle, String productImgUrl, String uploadUser) {
         return ProductImg.builder()
                 .product(product)
                 .productImgType(productImgType)
@@ -60,6 +59,7 @@ public class ProductImg implements ShardKey {
 
     @Override
     public String getUserId() {
-        return uploadUser.getUserId();
+        return this.uploadUser;
     }
+
 }

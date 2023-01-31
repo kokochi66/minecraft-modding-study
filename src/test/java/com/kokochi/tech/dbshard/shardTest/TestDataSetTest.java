@@ -75,7 +75,7 @@ public class TestDataSetTest extends AbstractShardTest {
                 String name = names[i % names.length];
                 ProductImgType imgType = imgTypes[i % imgTypes.length];
                 User user = userList.get(i % userList.size());
-                productImgList.add(ProductImg.createProductImg(product, imgType, name + "_" + i, "test", user));
+                productImgList.add(ProductImg.createProductImg(product, imgType, name + "_" + i, "test", user.getUserId()));
             }
         }
         productImgRepository.saveAll(productImgList);

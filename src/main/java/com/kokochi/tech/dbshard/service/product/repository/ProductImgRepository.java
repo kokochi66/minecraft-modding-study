@@ -33,4 +33,6 @@ public interface ProductImgRepository extends JpaRepository<ProductImg, Long> {
     Page<ProductImg> findByProductImgTitleContains(String productImgTitle, Pageable pageable);
 
     List<ProductImg> findAllByProductImgIdIsGreaterThan(Long productImgId);
+
+    List<ProductImg> findAllByUploadUser(User user);
 }

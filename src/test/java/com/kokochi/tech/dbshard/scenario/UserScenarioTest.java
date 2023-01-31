@@ -48,8 +48,7 @@ public class UserScenarioTest extends AbstractScenarioTest {
     void 회원_다량추가() {
         List<User> userList = new ArrayList<>();
         for (int i=0;i<100;i++) {
-            userList.add(User.createUser("testUser_"+i, "111"));
+            userService.upsertUser(User.createUser("testUser_"+i, "111"));
         }
-        userRepository.saveAll(userList);
     }
 }

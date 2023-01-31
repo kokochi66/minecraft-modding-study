@@ -1,18 +1,18 @@
 package com.kokochi.tech.dbshard.service.user;
 
+import com.kokochi.tech.dbshard.domain.shard.ShardNo;
 import com.kokochi.tech.dbshard.domain.user.User;
-import com.kokochi.tech.dbshard.domain.user.UserHistory;
 import com.kokochi.tech.dbshard.domain.user.UserShardKey;
-import com.kokochi.tech.dbshard.service.user.repository.UserRepository;
 import com.kokochi.tech.dbshard.service.user.repository.UserHistoryRepository;
+import com.kokochi.tech.dbshard.service.user.repository.UserRepository;
 import com.kokochi.tech.dbshard.service.user.repository.UserShardKeyRepository;
-import com.kokochi.tech.dbshard.shard.annotation.ShardService;
 import lombok.AllArgsConstructor;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 
 @Service
 @AllArgsConstructor
@@ -25,12 +25,12 @@ public class UserService {
 
     // 사용자 찾기
     public User getUserById(String id) {
-        return userRepository.findById(id).orElse(null);
+        return userShardService.getUserById(id);
     }
 
     // 로그인 검증
     public boolean verifyUser(String id, String password) {
-        User user = userRepository.findById(id).orElseThrow();
+        User user = getUserById(id);
         return password.equalsIgnoreCase(user.getPassword());
     }
 
@@ -45,20 +45,18 @@ public class UserService {
 
     // 회원 제거
     public void deleteUser(User user) {
-        userRepository.delete(user);
-    }
-
-    // 검색 기록 저장
-    public UserHistory upsertUserHistory(UserHistory userHistory) {
-        return userHistoryRepository.save(userHistory);
-    }
-
-    // 검색 기록 가져오기
-    public List<UserHistory> getUserHistoryList(User user) {
-        return userHistoryRepository.findAllByUser(user);
+        userShardService.deleteUser(user);
     }
 
     private String generateShardKey() {
         return RandomString.make(16);
+    }
+
+    // 모든 샤드의 사용자 데이터 가져오기
+    public List<User> getAllUserShard() {
+        List<User> shard1 = userShardService.getShardUser(new ShardNo(0));
+        List<User> shard2 = userShardService.getShardUser(new ShardNo(1));
+        shard1.addAll(shard2);
+        return shard1;
     }
 }

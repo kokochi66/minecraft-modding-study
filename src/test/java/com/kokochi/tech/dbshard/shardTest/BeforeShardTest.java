@@ -6,6 +6,7 @@ import com.kokochi.tech.dbshard.domain.product.ProductImgScore;
 import com.kokochi.tech.dbshard.domain.product.enumType.ProductImgType;
 import com.kokochi.tech.dbshard.domain.user.User;
 import com.kokochi.tech.dbshard.scenario.AbstractScenarioTest;
+import com.kokochi.tech.dbshard.service.product.ProductImgSearchService;
 import com.kokochi.tech.dbshard.service.product.ProductImgService;
 import com.kokochi.tech.dbshard.service.product.ProductService;
 import com.kokochi.tech.dbshard.service.product.repository.ProductImgRepository;
@@ -29,6 +30,8 @@ public class BeforeShardTest extends AbstractScenarioTest {
     private ProductService productService;
     @Autowired
     private ProductImgService productImgService;
+    @Autowired
+    private ProductImgSearchService productImgSearchService;
 
     @Autowired
     private UserRepository userRepository;
@@ -49,7 +52,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 인기 이미지 조회 (10개)
     @Test
     void 인기이미지_조회_10() {
-        Page<ProductImg> p = productImgService.getProductImgListByHotList(10, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListByHotList(10, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -59,7 +62,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 인기 이미지 조회 (100개)
     @Test
     void 인기이미지_조회_100() {
-        Page<ProductImg> p = productImgService.getProductImgListByHotList(100, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListByHotList(100, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -69,7 +72,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 인기 이미지 조회 (1000개)
     @Test
     void 인기이미지_조회_1000() {
-        Page<ProductImg> p = productImgService.getProductImgListByHotList(1000, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListByHotList(1000, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -79,7 +82,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 인기 이미지 조회 (전체)
     @Test
     void 인기이미지_조회_All() {
-        Page<ProductImg> p = productImgService.getProductImgListByHotList(1000000, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListByHotList(1000000, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -90,7 +93,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 이미지 검색 조회 (10개)
     @Test
     void 이미지검색_조회_10() {
-        Page<ProductImg> p = productImgService.getProductImgListBySearchList("bocchi", 10, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListBySearchList("bocchi", 10, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -100,7 +103,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 이미지 검색 조회 (100개)
     @Test
     void 이미지검색_조회_100() {
-        Page<ProductImg> p = productImgService.getProductImgListBySearchList("bocchi", 100, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListBySearchList("bocchi", 100, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -110,7 +113,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 이미지 검색 조회 (1000개)
     @Test
     void 이미지검색_조회_1000() {
-        Page<ProductImg> p = productImgService.getProductImgListBySearchList("bocchi", 1000, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListBySearchList("bocchi", 1000, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -120,7 +123,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 이미지 검색 조회 (전체)
     @Test
     void 이미지검색_조회_All() {
-        Page<ProductImg> p = productImgService.getProductImgListBySearchList("bocchi", 100000, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListBySearchList("bocchi", 100000, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -132,7 +135,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     @Test
     void 내_이미지_조회_10() {
         User user = userService.getUserById("");
-        Page<ProductImg> p = productImgService.getProductImgListByUserHotList(user, 10, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListByUserHotList(user, 10, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -147,7 +150,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     @Test
     void 내_이미지_조회_100() {
         User user = userService.getUserById("");
-        Page<ProductImg> p = productImgService.getProductImgListByUserHotList(user, 100, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListByUserHotList(user, 100, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -158,7 +161,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     @Test
     void 내_이미지_조회_1000() {
         User user = userService.getUserById("");
-        Page<ProductImg> p = productImgService.getProductImgListByUserHotList(user, 1000, 0);
+        Page<ProductImg> p = productImgSearchService.getProductImgListByUserHotList(user, 1000, 0);
         System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
         System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
         System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
@@ -172,7 +175,7 @@ public class BeforeShardTest extends AbstractScenarioTest {
     void 이미지_추가() {
         Product product = productRepository.findById(1L).orElseThrow();
         User user = userRepository.findById("").orElseThrow();
-        productImgService.upsertProductImg(ProductImg.createProductImg(product, ProductImgType.JPG, "testImg_" + 0, "test", user));
+        productImgService.upsertProductImg(ProductImg.createProductImg(product, ProductImgType.JPG, "testImg_" + 0, "test", user.getUserId()));
 
     }
 

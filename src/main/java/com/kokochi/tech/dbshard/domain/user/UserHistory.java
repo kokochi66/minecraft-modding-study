@@ -1,16 +1,13 @@
 package com.kokochi.tech.dbshard.domain.user;
 
 import com.kokochi.tech.dbshard.domain.product.ProductImg;
-import com.kokochi.tech.dbshard.domain.product.ProductImgScore;
-import com.kokochi.tech.dbshard.domain.shard.ShardKey;
+import com.kokochi.tech.dbshard.domain.shard.ShardKeyObject;
 import com.kokochi.tech.dbshard.domain.user.enumType.UserHistoryType;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -21,7 +18,7 @@ import java.util.List;
 @Table(name = "dss_user_history", indexes = {
         @Index(name = "idx_user", columnList = "userId")
 })
-public class UserHistory implements ShardKey {
+public class UserHistory implements ShardKeyObject {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long historyId;

@@ -2,7 +2,7 @@ package com.kokochi.tech.dbshard.domain.user;
 
 import com.kokochi.tech.dbshard.domain.product.ProductImg;
 import com.kokochi.tech.dbshard.domain.product.ProductImgScore;
-import com.kokochi.tech.dbshard.domain.shard.ShardKey;
+import com.kokochi.tech.dbshard.domain.shard.ShardKeyObject;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -19,7 +19,7 @@ import java.util.List;
 @Builder
 @ToString(of = {"userId", "userName"})
 @Table(name = "dss_user")
-public class User implements ShardKey {
+public class User implements ShardKeyObject {
 
     @Id
     private String userId;
@@ -29,9 +29,6 @@ public class User implements ShardKey {
 
     @CreatedDate
     private LocalDateTime regDate;
-
-    @OneToMany(mappedBy = "uploadUser")
-    private List<ProductImg> productImgList = new ArrayList<>();
 
     @Transient
     private List<ProductImgScore> productImgScoreList = new ArrayList<>();

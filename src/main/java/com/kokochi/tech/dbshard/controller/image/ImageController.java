@@ -36,12 +36,12 @@ public class ImageController {
         return "redirect:/image/view/" + savedImageId;
     }
 
-    @GetMapping("/view/{imageId}")
-    public String view(Model model, @PathVariable("imageId") Long imageId) {
-        ImageDto image = convertImageDto(productImgService.getProductImgById(imageId));
-        model.addAttribute("image", image);
-        return "image/view";
-    }
+//    @GetMapping("/view/{imageId}")
+//    public String view(Model model, @PathVariable("imageId") Long imageId) {
+//        ImageDto image = convertImageDto(productImgService.getProductImgById(imageId));
+//        model.addAttribute("image", image);
+//        return "image/view";
+//    }
 
     public ProductImg convertProductImg(ImageDto dto) {
         return ProductImg.builder()

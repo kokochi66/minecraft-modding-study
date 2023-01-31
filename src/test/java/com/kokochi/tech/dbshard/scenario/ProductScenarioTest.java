@@ -108,7 +108,7 @@ public class ProductScenarioTest extends AbstractScenarioTest {
 
 
     // 많은 작품 추가
-//    @Test
+    @Test
     @Rollback(false)
     void 작품_대량추가() {
         Random random = new Random();

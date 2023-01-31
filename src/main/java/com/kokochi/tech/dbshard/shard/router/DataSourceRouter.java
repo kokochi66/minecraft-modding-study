@@ -17,7 +17,6 @@ public class DataSourceRouter extends AbstractRoutingDataSource {
 
     @Override
     public void setTargetDataSources(Map<Object, Object> targetDataSources) {
-        System.out.println("TEST :: DataSourceRouter - setTargetDataSources() :: 1");
         super.setTargetDataSources(targetDataSources);
 
         shards = new HashMap<>();
@@ -27,7 +26,6 @@ public class DataSourceRouter extends AbstractRoutingDataSource {
             String dataSourceName = item.toString();
             shards.put(shardNo++, dataSourceName);
         }
-        System.out.println("TEST :: DataSourceRouter - setTargetDataSources() :: 2");
     }
 
     @Override
@@ -36,13 +34,10 @@ public class DataSourceRouter extends AbstractRoutingDataSource {
     }
 
     private String getShard() {
-        System.out.println("TEST :: DataSourceRouter - getShard() :: 1");
         Integer shardNo = RoutingDataSourceManager.getCurrentDataSource();
         if (shardNo == null) {
-            System.out.println("TEST :: DataSourceRouter - getShard() :: is null");
             shardNo = 0;
         }
-        System.out.println("TEST :: DataSourceRouter - getShard() :: 2 : " + shardNo);
 
         if (!shards.containsKey(shardNo)) {
             return shards.get(shards.keySet().stream().findAny().orElseThrow());
@@ -69,7 +64,6 @@ public class DataSourceRouter extends AbstractRoutingDataSource {
 //    }
 
     private int getShardNoByRange(List<ShardingProperty.ShardingRule> rules, long shardKey) {
-        System.out.println("TEST :: DataSourceRouter - getShardNoByRange() :: 1");
         for (ShardingProperty.ShardingRule rule : rules) {
             if (rule.getRangeMin() <= shardKey && shardKey <= rule.getRangeMax()) {
                 return rule.getShardNo();
@@ -79,7 +73,6 @@ public class DataSourceRouter extends AbstractRoutingDataSource {
     }
 
     private int getShardNoByModular(int modulus, long shardKey) {
-        System.out.println("TEST :: DataSourceRouter - getShardNoByModular() :: 1");
         return (int) (shardKey % modulus);
     }
 

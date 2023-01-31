@@ -1,7 +1,6 @@
 package com.kokochi.tech.dbshard.domain.product;
 
-import com.kokochi.tech.dbshard.domain.shard.ShardKey;
-import com.kokochi.tech.dbshard.domain.user.User;
+import com.kokochi.tech.dbshard.domain.shard.ShardKeyObject;
 import lombok.*;
 import javax.persistence.*;
 
@@ -17,7 +16,7 @@ import javax.persistence.*;
         @Index(name = "idx_product_img_id", columnList = "productImgId"),
         @Index(name = "idx_user_id", columnList = "userId"),
 })
-public class ProductImgScore implements ShardKey {
+public class ProductImgScore implements ShardKeyObject {
     @Id
     private Long productImgId;
     @Id
