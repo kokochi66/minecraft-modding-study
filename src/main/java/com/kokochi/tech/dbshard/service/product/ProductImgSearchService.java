@@ -3,13 +3,12 @@ package com.kokochi.tech.dbshard.service.product;
 import com.kokochi.tech.dbshard.domain.product.ProductImg;
 import com.kokochi.tech.dbshard.domain.shard.ShardNo;
 import com.kokochi.tech.dbshard.domain.user.User;
-import com.kokochi.tech.dbshard.service.product.ProductImgService;
-import com.kokochi.tech.dbshard.service.product.ProductService;
-import com.kokochi.tech.dbshard.service.product.repository.ProductImgRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -20,8 +19,9 @@ public class ProductImgSearchService {
 
     // 인기 이미지 조회
     public Page<ProductImg> getProductImgListByHotList(int size, int offset) {
-        Page<ProductImg> page1 = productImgService.getProductImgListByHotList(new ShardNo(0), size, offset);
 
+
+        Page<ProductImg> page1 = productImgService.getProductImgListByHotList(new ShardNo(0), size, offset);
         for (ProductImg productImg : page1) {
             System.out.println("TEST :: page1 = " + productImg);
         }
@@ -30,6 +30,8 @@ public class ProductImgSearchService {
         for (ProductImg productImg : page2) {
             System.out.println("TEST :: page2 = " + productImg);
         }
+        List<ProductImg> pageList = page1.getContent();
+        pageList.addAll(page2.getContent());
         return page1;
     }
 

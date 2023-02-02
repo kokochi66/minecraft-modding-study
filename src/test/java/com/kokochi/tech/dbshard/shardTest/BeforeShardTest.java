@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.annotation.Rollback;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Transactional
 public class BeforeShardTest extends AbstractScenarioTest {
@@ -52,41 +53,45 @@ public class BeforeShardTest extends AbstractScenarioTest {
     // 인기 이미지 조회 (10개)
     @Test
     void 인기이미지_조회_10() {
-        Page<ProductImg> p = productImgSearchService.getProductImgListByHotList(10, 0);
-        System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
-        System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
-        System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
-        System.out.println("TEST :: pageInfo :: NumberOfElement = " + p.getNumberOfElements());
+        List<ProductImg> p = productImgSearchService.getProductImgListByHotList(10, 0);
+//        System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
+//        System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
+//        System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
+//        System.out.println("TEST :: pageInfo :: NumberOfElement = " + p.getNumberOfElements());
+        System.out.println("TEST :: p " + p.size());
     }
 
     // 인기 이미지 조회 (100개)
     @Test
     void 인기이미지_조회_100() {
-        Page<ProductImg> p = productImgSearchService.getProductImgListByHotList(100, 0);
-        System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
-        System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
-        System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
-        System.out.println("TEST :: pageInfo :: NumberOfElement = " + p.getNumberOfElements());
+        List<ProductImg> p = productImgSearchService.getProductImgListByHotList(100, 0);
+//        System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
+//        System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
+//        System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
+//        System.out.println("TEST :: pageInfo :: NumberOfElement = " + p.getNumberOfElements());
+        System.out.println("TEST :: p " + p.size());
     }
 
     // 인기 이미지 조회 (1000개)
     @Test
     void 인기이미지_조회_1000() {
-        Page<ProductImg> p = productImgSearchService.getProductImgListByHotList(1000, 0);
-        System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
-        System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
-        System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
-        System.out.println("TEST :: pageInfo :: NumberOfElement = " + p.getNumberOfElements());
+        List<ProductImg> p = productImgSearchService.getProductImgListByHotList(1000, 0);
+//        System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
+//        System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
+//        System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
+//        System.out.println("TEST :: pageInfo :: NumberOfElement = " + p.getNumberOfElements());
+        System.out.println("TEST :: p " + p.size());
     }
 
     // 인기 이미지 조회 (전체)
     @Test
     void 인기이미지_조회_All() {
-        Page<ProductImg> p = productImgSearchService.getProductImgListByHotList(1000000, 0);
-        System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
-        System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
-        System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
-        System.out.println("TEST :: pageInfo :: NumberOfElement = " + p.getNumberOfElements());
+        List<ProductImg> p = productImgSearchService.getProductImgListByHotList(1000000, 0);
+//        System.out.println("TEST :: pageInfo :: totalElement = " + p.getTotalElements());
+//        System.out.println("TEST :: pageInfo :: totalPage = " + p.getTotalPages());
+//        System.out.println("TEST :: pageInfo :: hasNext = " + p.hasNext());
+//        System.out.println("TEST :: pageInfo :: NumberOfElement = " + p.getNumberOfElements());
+        System.out.println("TEST :: p " + p.size());
     }
 
 
