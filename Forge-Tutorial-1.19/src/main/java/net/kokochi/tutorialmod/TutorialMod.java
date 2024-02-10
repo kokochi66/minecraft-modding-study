@@ -1,6 +1,8 @@
 package net.kokochi.tutorialmod;
 
 import com.mojang.logging.LogUtils;
+import net.kokochi.tutorialmod.block.ModBlocks;
+import net.kokochi.tutorialmod.item.ModItems;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -25,6 +27,12 @@ public class TutorialMod
     public TutorialMod()
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        // 생성한 모드 아이템을 register 한다. (최초 모드가 실행될 때 진행)
+        ModItems.register(modEventBus);
+        // 생성한 모드 블럭을 register 한다.
+        ModBlocks.register(modEventBus);
+
 
         // 모드 로딩을 위한 commonSetup 메서드를 등록합니다.
         modEventBus.addListener(this::commonSetup);
