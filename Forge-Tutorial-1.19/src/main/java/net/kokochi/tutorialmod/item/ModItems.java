@@ -1,8 +1,12 @@
 package net.kokochi.tutorialmod.item;
 
 import net.kokochi.tutorialmod.TutorialMod;
+import net.kokochi.tutorialmod.block.ModBlocks;
+import net.kokochi.tutorialmod.item.custom.EightBallItem;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -38,7 +42,14 @@ public class ModItems {
             // modid 와 같이 이 아이템 이름도 모두 영소문자로만 이루어져있어야 한다.
             () -> new Item(new Item.Properties()
                     .stacksTo(5) // 스택될 수 있는 개수를 정의 (default 64)
-                    .tab(ModCreativeModeTab.TUTORIAL_TAB)  // 크리에이티브 모드 어느 탭에 존재할지를 정의
+                    .tab(ModCreativeModeTab.TUTORIAL_TAB)           // 크리에이티브 모드 어느 탭에 존재할지를 정의
+                    // .durability(250)                             // 아이템의 내구도를 설정합니다. 이 값은 도구나 무기에 주로 사용됩니다.
+                    // .craftRemainder(Items.STICK)                 // 아이템을 사용한 후 남는 아이템을 설정합니다. 예를 들어, 우유를 마시고 난 후 남는 빈 양동이 등.
+                    // .fireResistant()                             // 아이템이 불에 타지 않도록 설정합니다.
+                    // .rarity(Rarity.RARE)                         // 아이템의 희귀도를 설정합니다. Rarity 클래스에는 COMMON, UNCOMMON, RARE, EPIC가 있습니다.
+                    // .setNoRepair()                               // 아이템이 수리될 수 없도록 설정합니다.
+                    // .food(FoodProperties.Builder()
+                    // .nutrition(5).saturationMod(0.6f).build())   // 아이템이 음식일 경우, 영양가와 포화도를 설정합니다.
             ));
 
     public static final RegistryObject<Item> RAW_ZIRCON = ITEMS.register("raw_zircon",
@@ -46,4 +57,18 @@ public class ModItems {
                     .stacksTo(5)
                     .tab(ModCreativeModeTab.TUTORIAL_TAB_2)
             ));
+
+    public static final RegistryObject<Item> EIGHT_BALL = ITEMS.register("eight_ball",
+            () -> new EightBallItem(new Item.Properties()
+                    .stacksTo(1)
+                    .tab(ModCreativeModeTab.TUTORIAL_TAB)
+            ));
+
+    public static final RegistryObject<Item> BLUEBERRY_SEEDS = ITEMS.register("blueberry_seeds",
+            () -> new ItemNameBlockItem(ModBlocks.BLUEBERRY_CROP.get(),
+                    new Item.Properties().tab(ModCreativeModeTab.TUTORIAL_TAB)));
+    public static final RegistryObject<Item> BLUEBERRY = ITEMS.register("blueberry",
+            () -> new Item(new Item.Properties()
+                    .food(new FoodProperties.Builder().nutrition(2).saturationMod(2f).build())
+                    .tab(ModCreativeModeTab.TUTORIAL_TAB)));
 }

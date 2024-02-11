@@ -3,6 +3,10 @@ package net.kokochi.tutorialmod;
 import com.mojang.logging.LogUtils;
 import net.kokochi.tutorialmod.block.ModBlocks;
 import net.kokochi.tutorialmod.item.ModItems;
+import net.kokochi.tutorialmod.painting.ModPaintings;
+import net.kokochi.tutorialmod.villiager.ModVillagers;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -33,6 +37,9 @@ public class TutorialMod
         // 생성한 모드 블럭을 register 한다.
         ModBlocks.register(modEventBus);
 
+        ModVillagers.register(modEventBus);
+        ModPaintings.register(modEventBus);
+
 
         // 모드 로딩을 위한 commonSetup 메서드를 등록합니다.
         modEventBus.addListener(this::commonSetup);
@@ -43,9 +50,9 @@ public class TutorialMod
 
     private void commonSetup(final FMLCommonSetupEvent event)
     {
-        // 일부 공통 설정 코드
-        LOGGER.info("공통 설정에서 안녕하세요.");
-        LOGGER.info("흙 블록 >> {}", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT));
+        event.enqueueWork(() -> {
+            ModVillagers.registerPOIs();
+        });
     }
 
     // SubscribeEvent를 사용하여 이벤트 버스에서 호출될 메서드를 발견하도록 할 수 있습니다.
@@ -64,6 +71,7 @@ public class TutorialMod
         public static void onClientSetup(FMLClientSetupEvent event)
         {
             // 클라이언트 설정 코드
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLUEBERRY_CROP.get(), RenderType.cutout());
         }
     }
 }
