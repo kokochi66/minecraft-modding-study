@@ -79,9 +79,18 @@ public class ModBlocks {
                     UniformInt.of(3, 7)     // 채굴되는 경험치가 3에서 7까지 무작위로 설정된다.
             ), ModCreativeModeTab.TUTORIAL_TAB);
     public static final RegistryObject<Block> DEEPSLATE_ZIRCON_ORE = registerBlock("deepslate_zircon_ore",
-            // modid 와 같이 이 아이템 이름도 모두 영소문자로만 이루어져있어야 한다.
             () -> new DropExperienceBlock(BlockBehaviour.Properties.of(Material.STONE)
                     .strength(0.8f).requiresCorrectToolForDrops(),
+                    UniformInt.of(3, 7)
+            ), ModCreativeModeTab.TUTORIAL_TAB);
+    public static final RegistryObject<Block> ENDSTONE_ZIRCON_ORE = registerBlock("endstone_zircon_ore",
+            () -> new DropExperienceBlock(BlockBehaviour.Properties.of(Material.STONE)
+                    .strength(0.5f).requiresCorrectToolForDrops(),
+                    UniformInt.of(3, 7)
+            ), ModCreativeModeTab.TUTORIAL_TAB);
+    public static final RegistryObject<Block> NETHERRACK_ZIRCON_ORE = registerBlock("netherrack_zircon_ore",
+            () -> new DropExperienceBlock(BlockBehaviour.Properties.of(Material.STONE)
+                    .strength(0.3f).requiresCorrectToolForDrops(),
                     UniformInt.of(3, 7)
             ), ModCreativeModeTab.TUTORIAL_TAB);
 

@@ -5,6 +5,8 @@ import net.kokochi.tutorialmod.block.ModBlocks;
 import net.kokochi.tutorialmod.item.ModItems;
 import net.kokochi.tutorialmod.painting.ModPaintings;
 import net.kokochi.tutorialmod.villiager.ModVillagers;
+import net.kokochi.tutorialmod.world.feature.ModConfiguredFeatures;
+import net.kokochi.tutorialmod.world.feature.ModPlacedFeatures;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.block.Blocks;
@@ -39,6 +41,8 @@ public class TutorialMod
 
         ModVillagers.register(modEventBus);
         ModPaintings.register(modEventBus);
+        ModConfiguredFeatures.register(modEventBus);
+        ModPlacedFeatures.register(modEventBus);
 
 
         // 모드 로딩을 위한 commonSetup 메서드를 등록합니다.
