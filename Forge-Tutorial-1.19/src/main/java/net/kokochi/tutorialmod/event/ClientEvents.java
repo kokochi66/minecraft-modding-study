@@ -1,9 +1,9 @@
 package net.kokochi.tutorialmod.event;
 
 import net.kokochi.tutorialmod.TutorialMod;
+import net.kokochi.tutorialmod.networking.ModMessages;
+import net.kokochi.tutorialmod.networking.packet.DrinkWaterC2SPacket;
 import net.kokochi.tutorialmod.util.KeyBinding;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -37,8 +37,9 @@ public class ClientEvents {
             if (KeyBinding.DRINKING_KEY.consumeClick()) {
                 // 키가 눌렸을 때 수행할 동작을 여기에 정의합니다.
                 // 예제에서는 간단히 플레이어에게 시스템 메시지를 보냅니다.
-                Minecraft.getInstance().player.sendSystemMessage(
-                        Component.literal("Pressed a Drinking Key"));
+//                Minecraft.getInstance().player.sendSystemMessage(
+//                        Component.literal("Pressed a Drinking Key"));
+                ModMessages.sendToServer(new DrinkWaterC2SPacket());
             }
         }
     }

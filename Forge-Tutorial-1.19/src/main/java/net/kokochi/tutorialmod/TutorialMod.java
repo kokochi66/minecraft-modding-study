@@ -3,22 +3,21 @@ package net.kokochi.tutorialmod;
 import com.mojang.logging.LogUtils;
 import net.kokochi.tutorialmod.block.ModBlocks;
 import net.kokochi.tutorialmod.item.ModItems;
+import net.kokochi.tutorialmod.networking.ModMessages;
 import net.kokochi.tutorialmod.painting.ModPaintings;
 import net.kokochi.tutorialmod.villiager.ModVillagers;
 import net.kokochi.tutorialmod.world.feature.ModConfiguredFeatures;
 import net.kokochi.tutorialmod.world.feature.ModPlacedFeatures;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 // META-INF/mods.toml 파일에 있는 항목과 일치해야 합니다.
@@ -52,11 +51,22 @@ public class TutorialMod
         MinecraftForge.EVENT_BUS.register(this);
     }
 
+
+    /*
+    * commonSetup 메소드
+    * 마인크래프트 모드가 초기화 될 때 호출 (기본적인 초기화 작업이 실행될 때 호출됨.)
+    * enqueueWork 내에서 게임 로직 다중 스레드 환경에서 안정적으로 실행되도록 도움을 줄 수있음.
+    * */
     private void commonSetup(final FMLCommonSetupEvent event)
     {
         event.enqueueWork(() -> {
             ModVillagers.registerPOIs();
         });
+
+        /*
+        *
+        * */
+        ModMessages.register();
     }
 
     // SubscribeEvent를 사용하여 이벤트 버스에서 호출될 메서드를 발견하도록 할 수 있습니다.
