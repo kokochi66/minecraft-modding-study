@@ -1,5 +1,6 @@
 package net.kokochi.tutorialmod.networking.packet;
 
+import net.kokochi.tutorialmod.networking.ModMessages;
 import net.kokochi.tutorialmod.thirst.PlayerThirstProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
@@ -39,6 +40,7 @@ public class DrinkWaterC2SPacket {
 
             if (hasWaterAroundThem(player, level, 2)) {
                 // 물 근처에 있는 경우 - 물을 마신다.
+                // 물 근처에 있는 경우 - 물을 마신다.
                 player.sendSystemMessage(Component.translatable(MESSAGE_DRINK_WATER).withStyle(ChatFormatting.DARK_AQUA));
 
                 // 물을 마시는 사운드를 재생시킨다.
@@ -48,8 +50,7 @@ public class DrinkWaterC2SPacket {
                 // 물 레벨을 증가시킨다. (목마름 레벨을 증가시킨다.)
                 player.getCapability(PlayerThirstProvider.PLAYER_THIRST).ifPresent(thirst -> {
                     thirst.addThirst(1);
-                    player.sendSystemMessage(Component.literal("current Thirst " + thirst.getThirst())
-                            .withStyle(ChatFormatting.GOLD));
+                    ModMessages.sendToPlayer(new ThirstDataSyncC2SPacket(thirst.getThirst()), player);
                 });
 
 
@@ -60,8 +61,7 @@ public class DrinkWaterC2SPacket {
 
                 // 현재의 목마름 레벨을 표시한다.
                 player.getCapability(PlayerThirstProvider.PLAYER_THIRST).ifPresent(thirst -> {
-                    player.sendSystemMessage(Component.literal("current Thirst " + thirst.getThirst())
-                            .withStyle(ChatFormatting.GOLD));
+                    ModMessages.sendToPlayer(new ThirstDataSyncC2SPacket(thirst.getThirst()), player);
                 });
             }
         });

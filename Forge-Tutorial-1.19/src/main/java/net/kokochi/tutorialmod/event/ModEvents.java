@@ -3,11 +3,14 @@ package net.kokochi.tutorialmod.event;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.kokochi.tutorialmod.TutorialMod;
 import net.kokochi.tutorialmod.item.ModItems;
+import net.kokochi.tutorialmod.networking.ModMessages;
+import net.kokochi.tutorialmod.networking.packet.ThirstDataSyncC2SPacket;
 import net.kokochi.tutorialmod.thirst.PlayerThirst;
 import net.kokochi.tutorialmod.thirst.PlayerThirstProvider;
 import net.kokochi.tutorialmod.villiager.ModVillagers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -18,6 +21,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -110,10 +114,23 @@ public class ModEvents {
                 if (thirst.getThirst() > 0 && event.player.getRandom().nextFloat() < 0.005f) {
                     thirst.subThirst(1);
                     // 플레이어에게 목마름이 감소했다는 메시지를 보냅니다.
-                    event.player.sendSystemMessage(Component.literal("Substracted Thirst"));
+                    ModMessages.sendToPlayer(new ThirstDataSyncC2SPacket(thirst.getThirst()), (ServerPlayer) event.player);
                 }
             });
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerJoinWorld(EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide()) {
+            if (event.getEntity() instanceof ServerPlayer player) {
+                player.getCapability(PlayerThirstProvider.PLAYER_THIRST).ifPresent(thirst -> {
+                    // 플레이어가 월드에 join 했을 때에도 목마름 패킷을 보내도록 한다.
+                    ModMessages.sendToPlayer(new ThirstDataSyncC2SPacket(thirst.getThirst()), player);
+                });
+            }
+        }
+
     }
 
 }

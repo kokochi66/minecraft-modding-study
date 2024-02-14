@@ -4,6 +4,7 @@ package net.kokochi.tutorialmod.networking;
 import net.kokochi.tutorialmod.TutorialMod;
 import net.kokochi.tutorialmod.networking.packet.DrinkWaterC2SPacket;
 import net.kokochi.tutorialmod.networking.packet.ExampleC2SPacket;
+import net.kokochi.tutorialmod.networking.packet.ThirstDataSyncC2SPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
@@ -46,6 +47,12 @@ public class ModMessages {
                 .decoder(DrinkWaterC2SPacket::new) // 패킷 데이터를 해석하는 디코더를 설정합니다.
                 .encoder(DrinkWaterC2SPacket::toBytes) // 패킷 데이터를 바이트로 인코딩하는 인코더를 설정합니다.
                 .consumerMainThread(DrinkWaterC2SPacket::handle) // 패킷을 처리하는 핸들러 메소드를 설정합니다.
+                .add(); // 패킷을 채널에 등록합니다.
+
+        net.messageBuilder(ThirstDataSyncC2SPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ThirstDataSyncC2SPacket::new) // 패킷 데이터를 해석하는 디코더를 설정합니다.
+                .encoder(ThirstDataSyncC2SPacket::toBytes) // 패킷 데이터를 바이트로 인코딩하는 인코더를 설정합니다.
+                .consumerMainThread(ThirstDataSyncC2SPacket::handle) // 패킷을 처리하는 핸들러 메소드를 설정합니다.
                 .add(); // 패킷을 채널에 등록합니다.
     }
 

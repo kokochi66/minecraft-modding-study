@@ -1,11 +1,13 @@
 package net.kokochi.tutorialmod.event;
 
 import net.kokochi.tutorialmod.TutorialMod;
+import net.kokochi.tutorialmod.client.ThirstHudOverlay;
 import net.kokochi.tutorialmod.networking.ModMessages;
 import net.kokochi.tutorialmod.networking.packet.DrinkWaterC2SPacket;
 import net.kokochi.tutorialmod.util.KeyBinding;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -48,13 +50,17 @@ public class ClientEvents {
     // bus = Mod.EventBusSubscriber.Bus.MOD를 통해 모드 이벤트 버스에 등록됨을 나타냅니다.
     @Mod.EventBusSubscriber(modid = TutorialMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientModBusEvents {
-
         // onKeyRegister 메소드는 모드 이벤트 버스에서 키 바인딩을 등록하는 데 사용됩니다.
         // 이 메소드는 ClientForgeEvents 내부 클래스의 onKeyRegister 메소드와 유사하게 작동합니다.
         @SubscribeEvent
         public static void onKeyRegister(RegisterKeyMappingsEvent event) {
             // 키 바인딩을 등록합니다.
             event.register(KeyBinding.DRINKING_KEY);
+        }
+
+        @SubscribeEvent
+        public static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
+            event.registerAboveAll("thirst", ThirstHudOverlay.HUD_THIRST);
         }
     }
 }
