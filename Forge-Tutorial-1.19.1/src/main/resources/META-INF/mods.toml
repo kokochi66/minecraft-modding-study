@@ -1,0 +1,72 @@
+# 이것은 mods.toml 파일의 예시입니다. 모드를 로드하는 데 관련된 데이터를 포함합니다.
+# 필수 필드(#mandatory)가 여러 개 있고 선택적인 필드(#optional)가 더 많이 있습니다.
+# 전체적인 형식은 표준 TOML 형식, v0.5.0입니다.
+# 이 파일에는 TOML 리스트가 두 개 있습니다.
+# toml 형식에 대한 자세한 정보는 여기를 참조하세요: https://github.com/toml-lang/toml
+# 로드할 모드 로더 유형의 이름입니다 - 일반적인 FML @Mod 모드의 경우 javafml이어야 합니다.
+modLoader="javafml" # 필수
+# 해당 모드 로더와 일치하는 버전 범위 - 일반적인 FML @Mod에서는 포지 버전이 될 것입니다.
+loaderVersion="[41,)" # 필수 이 값은 대개 Forge에서 매 Minecraft 버전마다 올라갑니다. 버전 목록은 우리의 다운로드 페이지를 참조하세요.
+# 모드의 라이선스. 이것은 필수 메타데이터이며, 재배포 속성을 더 쉽게 이해할 수 있게 해줍니다.
+# 라이선스 옵션을 검토하세요 https://choosealicense.com/. 모든 권리 보유는 기본 저작권 기본 설정이며, 따라서 여기서도 기본 설정입니다.
+license="MIT License"
+# 이 모드에 문제가 발생했을 때 사용자를 지침할 URL
+#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" # 선택적
+# 모드의 목록 - 가능한 수는 개별 모드 로더에 의해 결정됩니다.
+[[mods]] # 필수
+# 모드의 모드 ID
+modId="tutorialmod" # 필수
+# 모드의 버전 번호 - 여기에는 몇 가지 잘 알려진 ${} 변수가 사용 가능하거나 간단히 하드코딩할 수 있습니다.
+# ${file.jarVersion}은 모드의 JAR 파일 메타데이터에서 읽은 Implementation-Version의 값을 대체합니다
+# 이것을 빌드하는 동안 완전 자동으로 채우는 방법에 대한 build.gradle 스크립트를 참조하세요.
+version="${file.jarVersion}" # 필수
+# 모드의 표시 이름
+displayName="Tutorial Mod" # 필수
+# 이 모드의 업데이트를 쿼리할 URL. JSON 업데이트 사양 https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
+#updateJSONURL="https://change.me.example.invalid/updates.json" # 선택적
+# 이 모드의 "홈페이지"에 대한 URL, 모드 UI에 표시됩니다.
+#displayURL="https://change.me.to.your.mods.homepage.example.invalid/" # 선택적
+# 표시용 로고를 포함하는 모드 JAR 루트의 파일 이름
+logoFile="examplemod.png" # 선택적
+# 모드 UI에 표시되는 텍스트 필드
+credits="이 예시 모드에 대한 감사는 Java에게 갑니다" # 선택적
+# 모드 UI에 표시되는 텍스트 필드
+authors="kokochi" # 선택적
+# 모드의 표시 테스트는 서버 연결 화면에서 모드의 표시를 제어합니다.
+# MATCH_VERSION은 서버와 클라이언트의 버전이 다를 경우 모드가 빨간 X를 표시하게 합니다. 이것은 서버 및 클라이언트 요소가 있는 경우 선택해야 하는 기본 동작입니다.
+# IGNORE_SERVER_VERSION은 모드가 서버에는 있지만 클라이언트에는 없을 경우 빨간 X를 표시하지 않습니다. 이것은 서버 전용 모드인 경우 사용해야 합니다.
+# IGNORE_ALL_VERSION은 모드가 클라이언트나 서버에 있으면 빨간 X를 표시하지 않습니다. 이것은 특수한 경우이며 서버 구성 요소가 없는 경우에만 사용해야 합니다.
+# NONE은 모드에 표시 테스트가 설정되지 않음을 의미합니다. 자세한 내용은 IExtensionPoint.DisplayTest를 참조하세요. 이 값으로 원하는 스키마를 정의할 수 있습니다.
+#displayTest="MATCH_VERSION" # 아무것도 지정되지 않으면 MATCH_VERSION이 기본 값입니다(#optional)
+
+# 모드에 대한 설명 텍스트(여러 줄!) (#mandatory)
+description='''
+이것은 모드에 대한 긴 설명입니다. 여기에는 원하는 내용을 작성할 수 있습니다.
+
+로렘 입숨을 살펴보세요.
+
+로렘 입숨 들어간 이상한 글이죠.
+
+로렘 입숨을 살펴보세요. 로렘 입숨은 라틴어 이상한 글이고 책과 폰트 디자인에 사용됩니다.
+'''
+# 의존성 - 특정 모드 ID에 대한 종속성을 나타냅니다. 의존성은 선택 사항입니다.
+[[dependencies.tutorialmod]] # 선택적
+# 종속성의 모드 ID
+modId="forge" # 필수
+# 이 종속성이 존재해야 하는지 여부 - 그렇지 않으면 아래에 순서를 지정해야 합니다
+mandatory=true # 필수
+# 종속성의 버전 범위
+versionRange="[41,)" # 필수
+# 종속성에 대한 순서 관계 - 그렇지 않은 경우 BEFORE 또는 AFTER를 지정해야 합니다
+ordering="NONE"
+# 이 종속성이 적용되는 쪽 - BOTH, CLIENT 또는 SERVER
+side="BOTH"
+# 또 다른 의존성
+[[dependencies.tutorialmod]]
+modId="minecraft"
+mandatory=true
+# 이 버전 범위는 현재 Minecraft 버전의 최소값부터 다음 주요 버전을 포함하지 않습니다
+versionRange="[1.19,1.20)"
+ordering="NONE"
+side="BOTH"
+
