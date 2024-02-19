@@ -76,4 +76,8 @@ public class ModItems {
                     .craftRemainder(Items.BUCKET)
                     .stacksTo(1)
                     .tab(ModCreativeModeTab.TUTORIAL_TAB)));
+
+    public static final RegistryObject<Item> KAUPENSWORD = ITEMS.register("kaupensword",
+            () -> new SwordItem(Tiers.DIAMOND, 10, 5f,
+                    new Item.Properties().tab(ModCreativeModeTab.TUTORIAL_TAB)));
 }
