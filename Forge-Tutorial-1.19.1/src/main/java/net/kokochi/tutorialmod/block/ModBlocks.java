@@ -2,6 +2,7 @@ package net.kokochi.tutorialmod.block;
 
 import net.kokochi.tutorialmod.TutorialMod;
 import net.kokochi.tutorialmod.block.custom.BlueberryCropBlock;
+import net.kokochi.tutorialmod.block.custom.GemInfusingStationBlock;
 import net.kokochi.tutorialmod.block.custom.JumpyBlock;
 import net.kokochi.tutorialmod.block.custom.ZirconLampBlock;
 import net.kokochi.tutorialmod.fluid.ModFluids;
@@ -109,6 +110,10 @@ public class ModBlocks {
             () -> new BlueberryCropBlock(BlockBehaviour.Properties.copy(Blocks.WHEAT)));
     public static final RegistryObject<LiquidBlock> SOAP_WATER_BLOCK = BLOCKS.register("soap_water_block",
             () -> new LiquidBlock(ModFluids.SOURCE_SOAP_WATER, BlockBehaviour.Properties.copy(Blocks.WATER)));
+
+    public static final RegistryObject<Block> GEM_INFUSING_STATION = registerBlock("gem_infusing_station",
+            () -> new GemInfusingStationBlock(BlockBehaviour.Properties.of(Material.METAL)
+                    .strength(6f).requiresCorrectToolForDrops().noOcclusion()), ModCreativeModeTab.TUTORIAL_TAB);
 
 
 
