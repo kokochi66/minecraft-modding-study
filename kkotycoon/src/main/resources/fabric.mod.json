@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "kkotycoon",
+	"version": "${version}",
+	"name": "KkoTycoon",
+	"description": "띵타이쿤 레퍼런스인 꼬타이쿤 모드입니다.",
+	"authors": [
+		"꼬꼬치꼬치"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/kkotycoon/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.kokochi.kkotycoon.KkoTycoon"
+		],
+		"client": [
+			"net.kokochi.kkotycoon.KkoTycoonClient"
+		],
+		"fabric-datagen": [
+			"net.kokochi.kkotycoon.KkoTycoonDataGenerator"
+		]
+	},
+	"mixins": [
+		"kkotycoon.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.7",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
