@@ -15,8 +15,10 @@ import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.StatusEffectSpriteManager;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.joml.Matrix4f;
@@ -104,7 +106,9 @@ public class CodexScreen extends Screen {
         int titleY = 30; // 텍스트 Y 좌표 (상단에서부터의 거리)
         context.drawText(textRenderer, titleText, titleX, titleY, 0xFFFFFFFF, true); // 텍스트 그리기
 
-        Identifier identifier = new Identifier("textures/block/dirt.png");
+        // 예제용으로 돌 블럭 텍스처를 띄우도록 수정
+        // 나중에 다 바까줘야함
+        Identifier identifier = new Identifier("kkotycoon", "textures/block/stone.png");
         // 아이템 슬롯 그리기
         // 아이템 렌더링 준비
         List<ItemStack> itemStacks = Arrays.stream(CodexSet.values()).map(c -> new ItemStack(c.getItem())).toList();
@@ -128,11 +132,9 @@ public class CodexScreen extends Screen {
             }
 
             // 아이템 이미지 렌더링
-//            context.drawItem(itemStack, x + iconOffset, y + iconOffset);
             context.drawTexture(identifier, x + iconOffset, y + iconOffset, 16, 16, 0, 0, 16, 16, 16, 16);
-//            // 도감 달성을 위해 필요한 개수 지정 (일단 디폴드로 10개로 설정)
+            // 도감 달성을 위해 필요한 개수 지정 (일단 디폴드로 10개로 설정)
             context.drawText(textRenderer, "10", x + 8, y + 10, 0xFFFFFFFF, true); // 텍스트 그리기
-//            context.drawTooltip(textRenderer, Text.of("10"), x + 8, y + 10);
         }
     }
 
@@ -141,12 +143,46 @@ public class CodexScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
 
         if (button == 0) {
-            if (mouseX >= arrowPositions[0].x && mouseX <= arrowPositions[0].x + arrowPositions[0].width && mouseY >= arrowPositions[0].y && mouseY <= arrowPositions[0].y + arrowPositions[0].height) {
+            if (mouseX >= arrowPositions[0].x
+                    && mouseX <= arrowPositions[0].x + arrowPositions[0].width
+                    && mouseY >= arrowPositions[0].y
+                    && mouseY <= arrowPositions[0].y + arrowPositions[0].height) {
                 changePage(-1); // 이전 페이지로
                 return true;
-            } else if (mouseX >= arrowPositions[1].x && mouseX <= arrowPositions[1].x + arrowPositions[1].width && mouseY >= arrowPositions[1].y && mouseY <= arrowPositions[1].y + arrowPositions[1].height) {
+            } else if (mouseX >= arrowPositions[1].x
+                    && mouseX <= arrowPositions[1].x + arrowPositions[1].width
+                    && mouseY >= arrowPositions[1].y
+                    && mouseY <= arrowPositions[1].y + arrowPositions[1].height) {
                 changePage(1); // 다음 페이지로
                 return true;
+            }
+
+            for (int i = 0; i < 105; i ++) {
+                Rectangle rectangle = itemSlotPositions.get(i);
+                int x = rectangle.x;
+                int y = rectangle.y;
+                int slotBoxSize = rectangle.width;
+
+                if (mouseX >= x
+                        && mouseX <= x + slotBoxSize
+                        && mouseY >= y
+                        && mouseY <= y + slotBoxSize) {
+                    // 아이템 보유사항을 체크합니다.
+                    PlayerInventory inventory = this.client.player.getInventory();
+                    ItemStack targetItem = itemStacks.get(i);
+                    int inventoryTargetItemCount = 0;
+                    for (int inventorySlot = 0; inventorySlot < this.client.player.getInventory().size(); inventorySlot ++) {
+                        ItemStack stack = inventory.getStack(inventorySlot);
+                        if (areItemStacksEqual(targetItem, stack)) {
+                            inventoryTargetItemCount += stack.getCount();
+                        }
+                    }
+                    if (inventoryTargetItemCount >= 10) {
+                        NbtCompound nbtCompound = new NbtCompound();
+                        this.client.player.readNbt(nbtCompound);
+                        
+                    }
+                }
             }
         }
 
@@ -154,6 +190,37 @@ public class CodexScreen extends Screen {
 
         return super.mouseClicked(mouseX, mouseY, button);
     }
+
+    public boolean areItemStacksEqual(ItemStack stack1, ItemStack stack2) {
+        // 둘 다 비어있는 경우 동일하다고 판단
+        if (stack1.isEmpty() && stack2.isEmpty()) {
+            return true;
+        }
+
+        // 하나만 비어있는 경우 다르다고 판단
+        if (stack1.isEmpty() || stack2.isEmpty()) {
+            return false;
+        }
+
+        // 아이템 유형 비교
+        if (stack1.getItem() != stack2.getItem()) {
+            return false;
+        }
+
+        // 손상 값(메타데이터) 비교
+        if (stack1.getDamage() != stack2.getDamage()) {
+            return false;
+        }
+
+        // NBT 데이터 비교 (NBT 데이터가 모두 있는 경우에만 비교)
+        if (stack1.hasNbt() && stack2.hasNbt()) {
+            return stack1.getNbt().equals(stack2.getNbt());
+        }
+
+        // NBT 데이터가 없는 경우 위의 조건들을 모두 통과하면 동일하다고 판단
+        return true;
+    }
+
 
 
     // esc를 눌러서 닫을 수 있는지 여부 설정
