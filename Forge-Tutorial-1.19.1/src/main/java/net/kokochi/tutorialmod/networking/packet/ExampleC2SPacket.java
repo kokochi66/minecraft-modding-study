@@ -23,6 +23,8 @@ public class ExampleC2SPacket {
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> supplier) {
+
+
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
             ServerPlayer player = context.getSender();

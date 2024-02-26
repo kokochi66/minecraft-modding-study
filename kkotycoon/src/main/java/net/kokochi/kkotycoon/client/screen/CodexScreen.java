@@ -1,34 +1,26 @@
 package net.kokochi.kkotycoon.client.screen;
 
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.kokochi.kkotycoon.KkoTycoon;
 import net.kokochi.kkotycoon.client.data.CodexSet;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.FontManager;
-import net.minecraft.client.font.FontStorage;
-import net.minecraft.client.font.TextRenderer;
+import net.kokochi.kkotycoon.client.packet.CodexC2SPostPacket;
+import net.kokochi.kkotycoon.client.packet.CodexS2CGetPacket;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.OutlineVertexConsumerProvider;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.StatusEffectSpriteManager;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.joml.Matrix4f;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 // 도감 화면 GUI를 개발
@@ -132,7 +124,9 @@ public class CodexScreen extends Screen {
             }
 
             // 아이템 이미지 렌더링
-            context.drawTexture(identifier, x + iconOffset, y + iconOffset, 16, 16, 0, 0, 16, 16, 16, 16);
+            // TODO :: 당장 표기가 헷갈려서 그냥 drawItem을 씀. 나중에 도감 완성되면 drawTexture로 바꿔주고, 아이템 텍스처 작업을 따로 해줘야함.
+//            context.drawTexture(identifier, x + iconOffset, y + iconOffset, 16, 16, 0, 0, 16, 16, 16, 16);
+            context.drawItem(itemStack, x + iconOffset, y + iconOffset);
             // 도감 달성을 위해 필요한 개수 지정 (일단 디폴드로 10개로 설정)
             context.drawText(textRenderer, "10", x + 8, y + 10, 0xFFFFFFFF, true); // 텍스트 그리기
         }
@@ -143,6 +137,7 @@ public class CodexScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
 
         if (button == 0) {
+            // 페이지 버튼 클릭시 페이지 이동
             if (mouseX >= arrowPositions[0].x
                     && mouseX <= arrowPositions[0].x + arrowPositions[0].width
                     && mouseY >= arrowPositions[0].y
@@ -157,31 +152,76 @@ public class CodexScreen extends Screen {
                 return true;
             }
 
+            // 아이템 클릭 시에 도감 채우기 이벤트
             for (int i = 0; i < 105; i ++) {
                 Rectangle rectangle = itemSlotPositions.get(i);
                 int x = rectangle.x;
                 int y = rectangle.y;
                 int slotBoxSize = rectangle.width;
-
                 if (mouseX >= x
                         && mouseX <= x + slotBoxSize
                         && mouseY >= y
                         && mouseY <= y + slotBoxSize) {
-                    // 아이템 보유사항을 체크합니다.
-                    PlayerInventory inventory = this.client.player.getInventory();
-                    ItemStack targetItem = itemStacks.get(i);
-                    int inventoryTargetItemCount = 0;
-                    for (int inventorySlot = 0; inventorySlot < this.client.player.getInventory().size(); inventorySlot ++) {
-                        ItemStack stack = inventory.getStack(inventorySlot);
-                        if (areItemStacksEqual(targetItem, stack)) {
-                            inventoryTargetItemCount += stack.getCount();
-                        }
-                    }
-                    if (inventoryTargetItemCount >= 10) {
-                        NbtCompound nbtCompound = new NbtCompound();
-                        this.client.player.readNbt(nbtCompound);
-                        
-                    }
+                    // 먼저 사용자 도감 정보를 조회해서 이미 도감이 완료된 상태인지를 파악합니다.
+                    NbtCompound nbtCompound = new NbtCompound();
+                    this.client.player.writeNbt(nbtCompound);
+                    byte[] codexArray = nbtCompound.getByteArray(CodexS2CGetPacket.CODEX_LIST_NBT_KEY);
+                    CodexSet[] codexSetsArray = CodexSet.values();
+                    int selectedItemIndex = (this.currentPage * 105) + i;
+
+                    ItemStack itemStack = itemStacks.get(selectedItemIndex);
+                    // 이미 등록된 아이템인지 여부도 서버에서 검증합니다.
+//                    for (int codexIndex : codexArray) {
+//                        CodexSet codexSet = codexSetsArray[codexIndex];
+//                        if (Item.getRawId(codexSet.getItem()) == Item.getRawId(itemStack.getItem())
+//                                && codexArray[codexIndex] == 1) {
+//                            // 이미 도감이 완료된 상태이면 이미 완료되었다는 메세지를 띄웁니다.
+//                            this.client.player.sendMessage(Text.of("이미 도감에 등록된 아이템입니다."));
+//                            return true;
+//                        }
+//                    }
+
+                    PacketByteBuf packetByteBuf = new PacketByteBuf(Unpooled.buffer());
+                    CodexC2SPostPacket.encode(new CodexC2SPostPacket(codexSetsArray[selectedItemIndex]), packetByteBuf);
+                    Identifier identifier = new Identifier(KkoTycoon.MOD_ID, CodexC2SPostPacket.CODEX_POST_PACKET_REQUEST_ID);
+                    ClientPlayNetworking.send(identifier, packetByteBuf);
+
+                    // 도감이 완료된 상태가 아니라면, 아이템 개수가 충분한지 체크합니다.
+                    // 개수가 충분한지와 아이템 소모 처리는 서버에서 처리합니다.
+//                    PlayerInventory inventory = this.client.player.getInventory();
+//                    ItemStack targetItem = itemStacks.get(i);
+//                    List<ItemStack> stacks = new ArrayList<>();
+//                    for (int inventorySlot = 0; inventorySlot < this.client.player.getInventory().size(); inventorySlot++) {
+//                        ItemStack stack = inventory.getStack(inventorySlot);
+//                        if (areItemStacksEqual(targetItem, stack)) {
+//                            stacks.add(stack);
+//                        }
+//                    }
+
+//                    if (stacks.stream().mapToInt(ItemStack::getCount).sum() >= 10) {
+//                        // 소지 개수가 충분하다면 도감을 등록하고, 해당 아이템을 제거해줍니다.
+//
+//                        // 도감 등록 정보를 서버로 보냅니다.
+//                        nbtCompound.putBoolean(itemCodexKey, true);
+//                        this.client.player.sendMessage(Text.of("도감에 \"" + targetItem.getName().toString() + "\" 이 등록되었습니다."));
+//                        int itemRemoveCount = 10;
+//                        for (ItemStack stack : stacks) {
+//                            if (stack.getCount() <= itemRemoveCount) {
+//                                // 한 아이템에 스택이 초과로 갖고있다면 해당 스택을 일단 다 가져가고 남은 아이템을 다시 지급합니다.
+//                                int remainedCount = stack.getCount() - itemRemoveCount;
+//                                this.client.player.getInventory().removeOne(stack);
+//                                this.client.player.getInventory().insertStack(new ItemStack(targetItem.getItem(), remainedCount));
+//                                itemRemoveCount = 0;
+//                                break;
+//                            } else {
+//                                itemRemoveCount -= stack.getCount();
+//                                this.client.player.getInventory().removeOne(stack);
+//                            }
+//                        }
+//                    } else {
+//                        // 갯수가 부족하다면 갯수가 부족하다는 내용의 메세지를 보냅니다.
+//                        this.client.player.sendMessage(Text.of("도감에 등록하기 위한 아이템 갯수가 부족합니다."));
+//                    }
                 }
             }
         }
