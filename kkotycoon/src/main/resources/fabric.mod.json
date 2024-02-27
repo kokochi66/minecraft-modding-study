@@ -25,9 +25,6 @@
 			"net.kokochi.kkotycoon.KkoTycoonDataGenerator"
 		]
 	},
-	"mixins": [
-		"kkotycoon.mixins.json"
-	],
 	"depends": {
 		"fabricloader": ">=0.15.7",
 		"minecraft": "~1.20.1",

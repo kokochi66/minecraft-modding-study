@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.kokochi.kkotycoon.client.packet.CodexS2CGetPacket;
 import net.kokochi.kkotycoon.client.screen.CodexScreen;
+import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -37,8 +38,6 @@ public class KkoTycoonClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         LOGGER.info("Hello Fabric world! client");
-
-        // 클라이언트가 월드에 진입 시의 실행될 로직을 등록
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             PacketByteBuf packetByteBuf = new PacketByteBuf(Unpooled.buffer());
             Identifier identifier = new Identifier(KkoTycoon.MOD_ID, CodexS2CGetPacket.CODEX_GET_PACKET_REQUEST_ID);
@@ -49,16 +48,7 @@ public class KkoTycoonClient implements ClientModInitializer {
                 new Identifier(KkoTycoon.MOD_ID, CodexS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID), (client, handler, buf, responseSender) ->
                 {
                     // 서버로부터 받은 도감 정보를 디코딩하는 로직
-                    byte[] codexArray = CodexS2CGetPacket.decode(buf);
-                    client.execute(() -> {
-                        // 받은 도감 정보를 클라이언트 내부 저장소에 저장
-                        NbtCompound nbtCompound = new NbtCompound();
-                        nbtCompound.putByteArray(CodexS2CGetPacket.CODEX_LIST_NBT_KEY, codexArray);
-                        if (client.player != null) {
-                            LOGGER.info(client.player.getUuidAsString() + " player get packet response");
-                            client.player.writeNbt(nbtCompound);
-                        }
-                    });
+                    ClientPlayerDataManager.playerData.setCodexArray(CodexS2CGetPacket.decode(buf));
                 });
 
         // ctrl + d를 눌렀을 때 도감이 열리는 것을 설정
