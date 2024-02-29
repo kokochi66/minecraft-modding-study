@@ -6,13 +6,15 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.kokochi.kkotycoon.client.packet.CodexS2CGetPacket;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
+import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.kokochi.kkotycoon.client.screen.CodexScreen;
 import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -40,15 +42,16 @@ public class KkoTycoonClient implements ClientModInitializer {
         LOGGER.info("Hello Fabric world! client");
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             PacketByteBuf packetByteBuf = new PacketByteBuf(Unpooled.buffer());
-            Identifier identifier = new Identifier(KkoTycoon.MOD_ID, CodexS2CGetPacket.CODEX_GET_PACKET_REQUEST_ID);
+            Identifier identifier = new Identifier(KkoTycoon.MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_REQUEST_ID);
             ClientPlayNetworking.send(identifier, packetByteBuf);
         });
 
         ClientPlayNetworking.registerGlobalReceiver(
-                new Identifier(KkoTycoon.MOD_ID, CodexS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID), (client, handler, buf, responseSender) ->
+                new Identifier(KkoTycoon.MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID), (client, handler, buf, responseSender) ->
                 {
                     // 서버로부터 받은 도감 정보를 디코딩하는 로직
-                    ClientPlayerDataManager.playerData.setCodexArray(CodexS2CGetPacket.decode(buf));
+                    KkotycoonPlayerData playerData = KkotycoonMainDataS2CGetPacket.decode(buf);
+                    ClientPlayerDataManager.setPlayerData(playerData);
                 });
 
         // ctrl + d를 눌렀을 때 도감이 열리는 것을 설정
@@ -61,6 +64,31 @@ public class KkoTycoonClient implements ClientModInitializer {
                     MinecraftClient.getInstance().setScreen(new CodexScreen(Text.literal("도감")));
                 }
             }
+        });
+
+
+        // HUD에 콘텐츠 그리기 이벤트 등록
+        HudRenderCallback.EVENT.register((matrixStack, delta) -> {
+            MinecraftClient client = MinecraftClient.getInstance();
+            TextRenderer textRenderer = client.textRenderer;
+
+            KkotycoonPlayerData playerData = ClientPlayerDataManager.playerData;
+
+            // 코인 보유량을 표시하기위한 박스 HUD
+            String message = playerData.getKkoCoin() + " kc";
+            int messageWidth = textRenderer.getWidth(message);
+
+            int paddingX = 5;
+            int paddingY = 3;
+            int backgroundX = 10;
+            int backgroundY = 6;
+            int backgroundWidth = messageWidth + (paddingX * 2);
+            int backgroundHeight = textRenderer.fontHeight + (paddingY * 2);
+            int backgroundColor = 0x6A000000; // 반투명 검정색
+            matrixStack.fill(backgroundX, backgroundY, backgroundX + backgroundWidth, backgroundY + backgroundHeight, backgroundColor);
+
+            // 메시지 텍스트 그리기
+            matrixStack.drawText(textRenderer, Text.of(message), backgroundX + paddingX, backgroundY + paddingY, 0xFFFFFF, true);
         });
     }
 }

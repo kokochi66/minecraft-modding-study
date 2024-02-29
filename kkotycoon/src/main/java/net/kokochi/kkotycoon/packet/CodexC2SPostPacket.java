@@ -1,4 +1,4 @@
-package net.kokochi.kkotycoon.client.packet;
+package net.kokochi.kkotycoon.packet;
 
 
 import net.kokochi.kkotycoon.KkoTycoon;

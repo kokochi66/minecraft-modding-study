@@ -1,7 +1,7 @@
 package net.kokochi.kkotycoon.entity.player;
 
 import net.kokochi.kkotycoon.KkoTycoon;
-import net.kokochi.kkotycoon.client.packet.CodexS2CGetPacket;
+import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
@@ -20,7 +20,7 @@ public class ServerPlayerDataManager extends PersistentState {
         NbtCompound playersNbt = new NbtCompound();
         playerDataMap.forEach((uuid, playerData) -> {
             NbtCompound playerNbt = new NbtCompound();
-            playerNbt.putByteArray(CodexS2CGetPacket.CODEX_LIST_NBT_KEY, playerData.getCodexArray());
+            playerNbt.putByteArray(KkotycoonMainDataS2CGetPacket.CODEX_LIST_NBT_KEY, playerData.getCodexArray());
             playersNbt.put(uuid.toString(), playerNbt);
         });
         nbt.put("players", playersNbt);
@@ -35,7 +35,7 @@ public class ServerPlayerDataManager extends PersistentState {
         playersNbt.getKeys().forEach(key -> {
             KkotycoonPlayerData playerData = new KkotycoonPlayerData();
 
-            byte[] byteArray = playersNbt.getCompound(key).getByteArray(CodexS2CGetPacket.CODEX_LIST_NBT_KEY);
+            byte[] byteArray = playersNbt.getCompound(key).getByteArray(KkotycoonMainDataS2CGetPacket.CODEX_LIST_NBT_KEY);
             playerData.setCodexArray(byteArray);
 
             UUID uuid = UUID.fromString(key);
@@ -58,7 +58,11 @@ public class ServerPlayerDataManager extends PersistentState {
         return serverState.playerDataMap.computeIfAbsent(player.getUuid(), uuid -> new KkotycoonPlayerData());
     }
 
-    public static void putCodexArray(LivingEntity player, byte[] codexArray) {
-        getPlayerData(player).setCodexArray(codexArray);
+    public static KkotycoonPlayerData resetPlayerData(LivingEntity player) {
+        ServerPlayerDataManager serverState = getServerState(player.getWorld().getServer());
+        // 데이터를 기본으로 초기화
+        KkotycoonPlayerData kkotycoonPlayerData = new KkotycoonPlayerData();
+        serverState.playerDataMap.put(player.getUuid(), kkotycoonPlayerData);
+        return kkotycoonPlayerData;
     }
 }

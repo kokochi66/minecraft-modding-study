@@ -1,21 +1,14 @@
 package net.kokochi.kkotycoon.client.screen;
 
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.impl.client.itemgroup.FabricCreativeGuiComponents;
 import net.kokochi.kkotycoon.KkoTycoon;
 import net.kokochi.kkotycoon.client.data.CodexSet;
-import net.kokochi.kkotycoon.client.packet.CodexC2SPostPacket;
-import net.kokochi.kkotycoon.client.packet.CodexS2CGetPacket;
+import net.kokochi.kkotycoon.packet.CodexC2SPostPacket;
 import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
-import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
-import net.minecraft.client.font.TextHandler;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -109,22 +102,23 @@ public class CodexScreen extends Screen {
         context.fill(arrowPositions[1].x, arrowPositions[1].y, arrowPositions[1].x + arrowPositions[1].width, arrowPositions[1].y + arrowPositions[1].height, 0xFF0000FF); // 왼쪽 화살표 (색상 변경 필요)
 
         // 도감 달성도 표시
+        byte[] codexArray = ClientPlayerDataManager.playerData.getCodexArray();
         int achievedCount = 0; // 달성한 도감 수 (변수로 처리)
+        for (byte b : codexArray) {
+            if (b == 1) {
+                achievedCount++;
+            }
+        }
         String titleText = "도감 달성도 " + achievedCount + "/300";
         int titleWidth = textRenderer.getWidth(titleText); // 텍스트 너비 계산
         int titleX = this.width / 2 - titleWidth / 2; // 텍스트 X 좌표 (가운데 정렬)
         int titleY = 30; // 텍스트 Y 좌표 (상단에서부터의 거리)
         context.drawText(textRenderer, titleText, titleX, titleY, 0xFFFFFFFF, true); // 텍스트 그리기
 
-        // 예제용으로 돌 블럭 텍스처를 띄우도록 수정
-        // 나중에 다 바까줘야함
-        Identifier identifier = new Identifier("kkotycoon", "textures/block/stone.png");
         // 아이템 슬롯 그리기
-        // 아이템 렌더링 준비
         List<ItemStack> itemStacks = Arrays.stream(CodexSet.values()).map(c -> new ItemStack(c.getItem())).toList();
         int iconOffset = 2;
 
-        byte[] codexArray = ClientPlayerDataManager.playerData.getCodexArray();
         for (int i = 0; i < 105; i ++) {
             Rectangle rectangle = itemSlotPositions.get(i);
             int x = rectangle.x;
