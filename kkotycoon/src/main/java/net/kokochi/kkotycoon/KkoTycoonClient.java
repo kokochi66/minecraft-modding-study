@@ -7,6 +7,8 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.kokochi.kkotycoon.entity.item.KkoTycoonItems;
+import net.kokochi.kkotycoon.entity.item.custom.KkoCoin;
 import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.kokochi.kkotycoon.client.screen.CodexScreen;
@@ -15,12 +17,15 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.NumberFormat;
 
 public class KkoTycoonClient implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(KkoTycoon.MOD_ID);
@@ -34,8 +39,6 @@ public class KkoTycoonClient implements ClientModInitializer {
             GLFW.GLFW_KEY_O, // 'o' 키에 대한 GLFW 키 코드
             "category.kkotycoon.keys" // 키바인딩 카테고리에 대한 번역 키
     ));
-
-
 
     @Override
     public void onInitializeClient() {
@@ -75,20 +78,25 @@ public class KkoTycoonClient implements ClientModInitializer {
             KkotycoonPlayerData playerData = ClientPlayerDataManager.playerData;
 
             // 코인 보유량을 표시하기위한 박스 HUD
-            String message = playerData.getKkoCoin() + " kc";
+            String message = NumberFormat.getInstance().format(playerData.getKkoCoin());
             int messageWidth = textRenderer.getWidth(message);
+            int iconWidth = 15;
 
-            int paddingX = 5;
-            int paddingY = 3;
+            int paddingX = 7;
+            int paddingY = 5;
             int backgroundX = 10;
             int backgroundY = 6;
-            int backgroundWidth = messageWidth + (paddingX * 2);
+            int backgroundWidth = messageWidth + (paddingX * 2) + iconWidth;
             int backgroundHeight = textRenderer.fontHeight + (paddingY * 2);
             int backgroundColor = 0x6A000000; // 반투명 검정색
             matrixStack.fill(backgroundX, backgroundY, backgroundX + backgroundWidth, backgroundY + backgroundHeight, backgroundColor);
 
             // 메시지 텍스트 그리기
             matrixStack.drawText(textRenderer, Text.of(message), backgroundX + paddingX, backgroundY + paddingY, 0xFFFFFF, true);
+            matrixStack.drawItem(new ItemStack(KkoTycoonItems.KkoCoin), backgroundX + paddingX + messageWidth + 2, backgroundY + paddingY - 4);
         });
+
+        // 모드 아이템 생성
+        KkoTycoonItems.initModItems();
     }
 }

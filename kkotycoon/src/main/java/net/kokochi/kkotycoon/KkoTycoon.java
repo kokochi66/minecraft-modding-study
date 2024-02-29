@@ -1,22 +1,18 @@
 package net.kokochi.kkotycoon;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.kokochi.kkotycoon.client.data.CodexSet;
+import net.kokochi.kkotycoon.entity.item.KkoTycoonItems;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.kokochi.kkotycoon.packet.CodexC2SPostPacket;
 import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
 import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
+import net.kokochi.kkotycoon.server.handler.CommandHandler;
 import net.minecraft.item.Item;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
@@ -86,48 +82,10 @@ public class KkoTycoon implements ModInitializer {
 					player.sendMessage(Text.of("\"" + item.getName().getString()+ "\" 아이템이 도감에 등록되었습니다!"));
 				});
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+		// 명령어 생성
+		CommandHandler.initCommand();
 
-			// 데이터 초기화 명령어
-			dispatcher.register(CommandManager.literal("kkc")
-					.then(CommandManager.argument("playerId", StringArgumentType.string())
-							.then(CommandManager.literal("reset")
-									.requires(source -> source.hasPermissionLevel(2)) // OP 권한 요구
-									.executes(context -> {
-										String playerId = StringArgumentType.getString(context, "playerId");
-										ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
-										KkotycoonPlayerData kkotycoonPlayerData = ServerPlayerDataManager.resetPlayerData(player);
-										player.sendMessage(Text.of("꼬타이쿤 게임 데이터가 초기화 되었습니다."));
-
-										// 클라이언트에 응답 데이터를 내려줍니다.
-										PacketByteBuf responseBuf = new PacketByteBuf(Unpooled.buffer());
-										KkotycoonMainDataS2CGetPacket.encode(new KkotycoonMainDataS2CGetPacket(kkotycoonPlayerData), responseBuf);
-										Identifier responsePacketId = new Identifier(MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID);
-										ServerPlayNetworking.send(player, responsePacketId, responseBuf);
-										return 1;
-									}))));
-
-			// 코인 추가 명령어
-			dispatcher.register(CommandManager.literal("kkc")
-					.then(CommandManager.argument("playerId", StringArgumentType.string())
-							.then(CommandManager.literal("addCoin")
-									.then(CommandManager.argument("coinAmount", IntegerArgumentType.integer())
-											.requires(source -> source.hasPermissionLevel(2)) // OP 권한 요구
-											.executes(context -> {
-												String playerId = StringArgumentType.getString(context, "playerId");
-												int coinAmount = IntegerArgumentType.getInteger(context, "coinAmount");
-												ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
-												KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
-												playerData.setKkoCoin(playerData.getKkoCoin() + coinAmount);
-												player.sendMessage(Text.of("코인이 지급되었습니다."));
-
-												// 클라이언트에 응답 데이터를 내려줍니다.
-												PacketByteBuf responseBuf = new PacketByteBuf(Unpooled.buffer());
-												KkotycoonMainDataS2CGetPacket.encode(new KkotycoonMainDataS2CGetPacket(playerData), responseBuf);
-												Identifier responsePacketId = new Identifier(MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID);
-												ServerPlayNetworking.send(player, responsePacketId, responseBuf);
-												return 1;
-											})))));
-		});
+		// 아이템 추가
+		KkoTycoonItems.initModItems();
 	}
 }
