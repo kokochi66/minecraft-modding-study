@@ -1,19 +1,26 @@
 package net.kokochi.kkotycoon.entity.player;
 
 import net.kokochi.kkotycoon.KkoTycoon;
+import net.kokochi.kkotycoon.entity.codex.CodexSet;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 public class ServerPlayerDataManager extends PersistentState {
-    public static final HashMap<UUID, KkotycoonPlayerData> playerDataMap = new HashMap<>();
+    public static HashMap<UUID, KkotycoonPlayerData> playerDataMap = new HashMap<>();
+    public static List<Integer> codexItemIdList = Arrays.stream(CodexSet.values())
+            .map(codexSet -> Item.getRawId(codexSet.getItem()))
+            .collect(Collectors.toList());
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt) {
@@ -24,6 +31,8 @@ public class ServerPlayerDataManager extends PersistentState {
             playersNbt.put(uuid.toString(), playerNbt);
         });
         nbt.put("players", playersNbt);
+
+        nbt.putIntArray("codexItemIdList", codexItemIdList);
         return nbt;
     }
 
@@ -42,6 +51,10 @@ public class ServerPlayerDataManager extends PersistentState {
             state.playerDataMap.put(uuid, playerData);
         });
 
+        int[] codexIemIdArray = tag.getIntArray("codexItemIdList");
+        state.codexItemIdList.clear();
+        state.codexItemIdList.addAll(Arrays.stream(codexIemIdArray).boxed().collect(toList()));
+
         return state;
     }
 
@@ -56,6 +69,11 @@ public class ServerPlayerDataManager extends PersistentState {
     public static KkotycoonPlayerData getPlayerData(LivingEntity player) {
         ServerPlayerDataManager serverState = getServerState(player.getWorld().getServer());
         return serverState.playerDataMap.computeIfAbsent(player.getUuid(), uuid -> new KkotycoonPlayerData());
+    }
+
+    public static List<Integer> getCodexList(MinecraftServer server) {
+        ServerPlayerDataManager serverState = getServerState(server);
+        return serverState.codexItemIdList;
     }
 
     public static KkotycoonPlayerData resetPlayerData(LivingEntity player) {

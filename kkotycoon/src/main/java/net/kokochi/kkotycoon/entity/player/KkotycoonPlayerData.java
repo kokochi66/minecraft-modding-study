@@ -1,12 +1,10 @@
 package net.kokochi.kkotycoon.entity.player;
 
-import net.kokochi.kkotycoon.client.data.CodexSet;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 public class KkotycoonPlayerData {
     private byte[] codexArray;
@@ -15,7 +13,7 @@ public class KkotycoonPlayerData {
     private List<LocalDateTime> codexLevelUpStack;
 
     public KkotycoonPlayerData() {
-        this.codexArray = new byte[CodexSet.values().length];
+        this.codexArray = new byte[350];
         this.kkoCoin = 0L;
         this.lastReceivedCodexRewardDate = LocalDateTime.now();
         this.codexLevelUpStack = new ArrayList<>();

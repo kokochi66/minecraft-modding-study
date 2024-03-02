@@ -2,14 +2,13 @@ package net.kokochi.kkotycoon.client.screen;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.kokochi.kkotycoon.KkoTycoon;
-import net.kokochi.kkotycoon.client.data.CodexSet;
 import net.kokochi.kkotycoon.packet.CodexC2SPostPacket;
 import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
@@ -22,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static net.kokochi.kkotycoon.KkoTycoon.MOD_ID;
 
 // 도감 화면 GUI를 개발
 public class CodexScreen extends Screen {
@@ -57,7 +58,7 @@ public class CodexScreen extends Screen {
 
                 // 서버로 보상 수령 요청을 보냅니다. (따로 데이터를 담아서 보낼 필요는 없습니다.)
                 PacketByteBuf packetByteBuf = new PacketByteBuf(Unpooled.buffer());
-                Identifier identifier = new Identifier(KkoTycoon.MOD_ID, CodexC2SPostPacket.CODEX_POST_REWARD_REQUEST_ID);
+                Identifier identifier = new Identifier(MOD_ID, CodexC2SPostPacket.CODEX_POST_REWARD_REQUEST_ID);
                 ClientPlayNetworking.send(identifier, packetByteBuf);
             }
         }).dimensions(this.width - (rewardButtonTextWidth + 40), 15, rewardButtonTextWidth + 20, 30).build();
@@ -77,7 +78,11 @@ public class CodexScreen extends Screen {
                 itemSlotPositions.add(new Rectangle(x, y, slotBoxSize, slotBoxSize));
             }
         }
-        itemStacks = Arrays.stream(CodexSet.values()).map(c -> new ItemStack(c.getItem())).collect(Collectors.toList());
+
+
+        itemStacks = ClientPlayerDataManager.codexList.stream()
+                .map(id -> new ItemStack(Item.byRawId(id)))
+                .collect(Collectors.toList());
         itemTooltips = itemStacks.stream()
                 .map(itemStack ->
                         Text.of(getTooltipFromItem(Objects.requireNonNull(this.client), itemStack)
@@ -94,8 +99,6 @@ public class CodexScreen extends Screen {
         arrowPositions[0] = new Rectangle(leftArrowX, arrowY, arrowSize, arrowSize);
         arrowPositions[1] = new Rectangle(rightArrowX, arrowY, arrowSize, arrowSize);
     }
-
-
 
     // 페이지 변경 메서드
     private void changePage(int direction) {
@@ -119,8 +122,13 @@ public class CodexScreen extends Screen {
         context.fill(0, 0, this.width, this.height, 0x01000000); // 반투명 검은색
 
         // 화살표 버튼 그리기
-        context.fill(arrowPositions[0].x, arrowPositions[0].y, arrowPositions[0].x + arrowPositions[0].width, arrowPositions[0].y + arrowPositions[0].height, 0xFF0000FF); // 왼쪽 화살표 (색상 변경 필요)
-        context.fill(arrowPositions[1].x, arrowPositions[1].y, arrowPositions[1].x + arrowPositions[1].width, arrowPositions[1].y + arrowPositions[1].height, 0xFF0000FF); // 왼쪽 화살표 (색상 변경 필요)
+        Identifier leftArrowIdentifier = new Identifier(MOD_ID, "textures/gui/arrow.png");
+        Identifier rightArrowIdentifier = new Identifier(MOD_ID, "textures/gui/right_arrow.png");
+
+        context.fill(arrowPositions[0].x, arrowPositions[0].y, arrowPositions[0].x + arrowPositions[0].width, arrowPositions[0].y + arrowPositions[0].height, 0x90FFFFFF); // 왼쪽 화살표 (색상 변경 필요)
+        context.fill(arrowPositions[1].x, arrowPositions[1].y, arrowPositions[1].x + arrowPositions[1].width, arrowPositions[1].y + arrowPositions[1].height, 0x90FFFFFF); // 오른쪽 화살표 (색상 변경 필요)
+        context.drawTexture(leftArrowIdentifier, arrowPositions[0].x, arrowPositions[0].y, 0, 0, 20, 20, 20, 20);
+        context.drawTexture(rightArrowIdentifier, arrowPositions[1].x, arrowPositions[1].y, 0, 0, 20, 20, 20, 20);
 
         // 도감 달성도 표시
         byte[] codexArray = ClientPlayerDataManager.playerData.getCodexArray();
@@ -137,9 +145,7 @@ public class CodexScreen extends Screen {
         context.drawText(textRenderer, titleText, titleX, titleY, 0xFFFFFFFF, true); // 텍스트 그리기
 
         // 아이템 슬롯 그리기
-        List<ItemStack> itemStacks = Arrays.stream(CodexSet.values()).map(c -> new ItemStack(c.getItem())).toList();
         int iconOffset = 2;
-
         for (int i = 0; i < 105; i ++) {
             Rectangle rectangle = itemSlotPositions.get(i);
             int x = rectangle.x;
@@ -202,13 +208,13 @@ public class CodexScreen extends Screen {
                         && mouseX <= x + slotBoxSize
                         && mouseY >= y
                         && mouseY <= y + slotBoxSize) {
-                    CodexSet[] codexSetsArray = CodexSet.values();
                     int selectedItemIndex = (this.currentPage * 105) + i;
+                    Integer codexItemId = ClientPlayerDataManager.codexList.get(selectedItemIndex);
 
                     // 서버로 도감 완료 요청을 보냅니다.
                     PacketByteBuf packetByteBuf = new PacketByteBuf(Unpooled.buffer());
-                    CodexC2SPostPacket.encode(new CodexC2SPostPacket(codexSetsArray[selectedItemIndex]), packetByteBuf);
-                    Identifier identifier = new Identifier(KkoTycoon.MOD_ID, CodexC2SPostPacket.CODEX_POST_PACKET_REQUEST_ID);
+                    CodexC2SPostPacket.encode(new CodexC2SPostPacket(codexItemId), packetByteBuf);
+                    Identifier identifier = new Identifier(MOD_ID, CodexC2SPostPacket.CODEX_POST_PACKET_REQUEST_ID);
                     ClientPlayNetworking.send(identifier, packetByteBuf);
                 }
             }

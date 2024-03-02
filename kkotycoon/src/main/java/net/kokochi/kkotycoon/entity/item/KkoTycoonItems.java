@@ -4,10 +4,7 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.kokochi.kkotycoon.KkoTycoon;
-import net.kokochi.kkotycoon.entity.item.custom.HomeScroll;
-import net.kokochi.kkotycoon.entity.item.custom.ItemToolBox;
-import net.kokochi.kkotycoon.entity.item.custom.KkoCoin;
-import net.kokochi.kkotycoon.entity.item.custom.RandomEnchantTicket;
+import net.kokochi.kkotycoon.entity.item.custom.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.Registries;
@@ -32,6 +29,10 @@ public class KkoTycoonItems {
             new HomeScroll(new FabricItemSettings()
                     .maxCount(64)
             ));
+    public static final Item ITEM_EFFECT_SCROLL = registerItem("item_eff_scroll",
+            new ItemEffectScroll(new FabricItemSettings()
+                    .maxCount(64)
+            ));
 
     public static Item registerItem(String name, Item item) {
         return Registry.register(Registries.ITEM, new Identifier(KkoTycoon.MOD_ID, name), item);
@@ -41,6 +42,7 @@ public class KkoTycoonItems {
         entries.add(RANDOM_ENCHANT_TICKET);
         entries.add(ITEM_TOOL_BOX);
         entries.add(HOME_SCROLL);
+        entries.add(ITEM_EFFECT_SCROLL);
     }
 
     public static void initModItems() {

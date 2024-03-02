@@ -1,11 +1,11 @@
-package net.kokochi.kkotycoon.client.data;
+package net.kokochi.kkotycoon.entity.codex;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
 // 도감 순서
 public enum CodexSet {
-    STONE(Items.STONE),
+    STONE(Items.STONE, 10),
     GRANITE(Items.GRANITE),
     DIORITE(Items.DIORITE),
     ANDESITE(Items.ANDESITE),
@@ -316,9 +316,16 @@ public enum CodexSet {
 
     CodexSet(Item item) {
         this.item = item;
+        this.codexCount = 10;
+    }
+
+    CodexSet(Item item, int codexCount) {
+        this.item = item;
+        this.codexCount = codexCount;
     }
 
     private final Item item;
+    private final int codexCount;
 
     public Item getItem() {
         return item;

@@ -7,11 +7,13 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.kokochi.kkotycoon.client.screen.ShopScreen;
 import net.kokochi.kkotycoon.entity.item.KkoTycoonItems;
 import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.kokochi.kkotycoon.client.screen.CodexScreen;
 import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
+import net.kokochi.kkotycoon.packet.ShopScreenS2CPacket;
 import net.kokochi.kkotycoon.server.handler.PlayerActionEventHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -55,6 +57,18 @@ public class KkoTycoonClient implements ClientModInitializer {
                     // 서버로부터 받은 도감 정보를 디코딩하는 로직
                     KkotycoonPlayerData playerData = KkotycoonMainDataS2CGetPacket.decode(buf);
                     ClientPlayerDataManager.setPlayerData(playerData);
+                    ClientPlayerDataManager.setCodexList(KkotycoonMainDataS2CGetPacket.decodeCodexArray(buf));
+                });
+
+        ClientPlayNetworking.registerGlobalReceiver(
+                new Identifier(KkoTycoon.MOD_ID, ShopScreenS2CPacket.SHOP_OPEN_SCREEN_REQUEST_ID), (client, handler, buf, responseSender) ->
+                {
+                    if (client != null && client.player != null) {
+                        client.execute(() -> {  // 메인 렌더링 스레드에서 실행되도록 예약
+                            MinecraftClient.getInstance().setScreen(new ShopScreen(Text.of("상점")));
+                        });
+
+                    }
                 });
 
         // ctrl + d를 눌렀을 때 도감이 열리는 것을 설정

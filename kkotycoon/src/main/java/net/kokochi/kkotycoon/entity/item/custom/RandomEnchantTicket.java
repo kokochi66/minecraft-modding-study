@@ -58,8 +58,7 @@ public class RandomEnchantTicket extends Item {
 
                 for (ServerPlayerEntity player : ((ServerWorld) world).getPlayers()) {
                     player.sendMessage(Text.of("§6" + user.getName().getString() + "§f 님께서 "  + tier + "§f 티어의 \"§9" + enchantment.getName(level).getString() + "§f\" 를 획득하셨습니다!"));
-                    world.playSound(null, player.getX(), player.getY(), player.getZ(),
-                            SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1.0F, 1.0F);
+                    player.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1.0F, 1.0F);
                 }
             } else {
                 if (S_TIER.stream().anyMatch(e -> e == enchantment)) {

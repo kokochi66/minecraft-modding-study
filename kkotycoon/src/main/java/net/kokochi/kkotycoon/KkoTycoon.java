@@ -23,6 +23,7 @@ public class KkoTycoon implements ModInitializer {
 
         ServerRequestHandler.initDataRequestHandler();
         ServerRequestHandler.initCodexRequestHandler();
+        ServerRequestHandler.initShopPurchaseRequestHandler();
 
         // 명령어 생성
         CommandHandler.initCommand();
