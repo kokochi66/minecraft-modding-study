@@ -8,14 +8,15 @@ import net.kokochi.kkotycoon.packet.CodexC2SPostPacket;
 import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,11 +25,11 @@ import java.util.stream.Collectors;
 
 // 도감 화면 GUI를 개발
 public class CodexScreen extends Screen {
-    public static final Logger LOGGER = LoggerFactory.getLogger(KkoTycoon.MOD_ID);
     private List<Rectangle> itemSlotPositions;
     private List<ItemStack> itemStacks;
     private List<Text> itemTooltips;
     private Rectangle[] arrowPositions;
+    private ButtonWidget rewardButtonWidget;
 
     private final int MAX_PAGE = 2;
     private int currentPage = 0;
@@ -41,6 +42,26 @@ public class CodexScreen extends Screen {
     protected void init() {
         super.init();
         initPositionData();
+
+        // 보상 수령을 위한 버튼
+        Text rewardButtonText = Text.of("보상 수령");
+        int rewardButtonTextWidth = textRenderer.getWidth(rewardButtonText);
+        rewardButtonWidget = ButtonWidget.builder(rewardButtonText, button -> {
+            if (button.isSelected()) {
+                // 수령할 보상이 없다면 서버로 요청을 보내지 않습니다. (과부하 방지용)
+                long codexReward = ClientPlayerDataManager.playerData.calculCodexReward();
+                if (codexReward <= 0) {
+                    this.client.player.sendMessage(Text.of("수령할 보상이 없습니다. 잠시만 기다려 주세요."));
+                    return;
+                }
+
+                // 서버로 보상 수령 요청을 보냅니다. (따로 데이터를 담아서 보낼 필요는 없습니다.)
+                PacketByteBuf packetByteBuf = new PacketByteBuf(Unpooled.buffer());
+                Identifier identifier = new Identifier(KkoTycoon.MOD_ID, CodexC2SPostPacket.CODEX_POST_REWARD_REQUEST_ID);
+                ClientPlayNetworking.send(identifier, packetByteBuf);
+            }
+        }).dimensions(this.width - (rewardButtonTextWidth + 40), 15, rewardButtonTextWidth + 20, 30).build();
+        addDrawableChild(rewardButtonWidget);
     }
 
     private void initPositionData() {
@@ -147,6 +168,8 @@ public class CodexScreen extends Screen {
 
         }
 
+        Tooltip tooltip = Tooltip.of(Text.of("현재 보상 :" + NumberFormat.getInstance().format(ClientPlayerDataManager.playerData.calculCodexReward()) + " kc"));
+        rewardButtonWidget.setTooltip(tooltip);
     }
 
     // 화살표 클릭 이벤트 처리

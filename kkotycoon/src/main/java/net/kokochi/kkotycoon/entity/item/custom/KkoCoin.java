@@ -31,6 +31,13 @@ public class KkoCoin extends Item {
             // 서버에서만 처리, 메인 손에 들려있는 경우에만 사용 처리
             ItemStack stackInHand = user.getStackInHand(hand);
             Text name = stackInHand.getName();
+
+            // 예외처리, (금색으로 되어있지 않은 꼬코인은 위조지폐입니다.)
+            if (!name.getString().contains("§6")) {
+                user.sendMessage(Text.of("이것은 §c위조지폐§f입니다!!! 당장 관리자에게 신고하세요."));
+                return super.use(world, user, hand);
+            }
+
             // 아이템 이름으로부터 가격 정보만 가져옵니다.
             long coinAmount = Long.parseLong(name.getString().replaceAll("§6", "").replaceAll("꼬코인", "").replaceAll(",", ""));
 

@@ -1,3 +1,7 @@
 {
-  "item.kkotycoon.kko_coin": "kkoCoin"
+  "item.kkotycoon.kko_coin": "꼬코인",
+  "item.kkotycoon.home_scroll": "마을 귀환서",
+  "item.kkotycoon.item_eff_scroll": "아이템 강화 주문서",
+  "item.kkotycoon.item_tool_box": "아이템 수리 키트",
+  "item.kkotycoon.random_enchant_ticket": "랜덤 인챈트북 뽑기권"
 }

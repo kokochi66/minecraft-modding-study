@@ -8,11 +8,11 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.kokochi.kkotycoon.entity.item.KkoTycoonItems;
-import net.kokochi.kkotycoon.entity.item.custom.KkoCoin;
 import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.kokochi.kkotycoon.client.screen.CodexScreen;
 import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
+import net.kokochi.kkotycoon.server.handler.PlayerActionEventHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.option.KeyBinding;
@@ -69,6 +69,9 @@ public class KkoTycoonClient implements ClientModInitializer {
             }
         });
 
+        // 툴팁 관련 수정내용
+        PlayerActionEventHandler.initPlayerActionClientEvent();
+
 
         // HUD에 콘텐츠 그리기 이벤트 등록
         HudRenderCallback.EVENT.register((matrixStack, delta) -> {
@@ -93,7 +96,7 @@ public class KkoTycoonClient implements ClientModInitializer {
 
             // 메시지 텍스트 그리기
             matrixStack.drawText(textRenderer, Text.of(message), backgroundX + paddingX, backgroundY + paddingY, 0xFFFFFF, true);
-            matrixStack.drawItem(new ItemStack(KkoTycoonItems.KkoCoin), backgroundX + paddingX + messageWidth + 2, backgroundY + paddingY - 4);
+            matrixStack.drawItem(new ItemStack(KkoTycoonItems.KKO_COIN), backgroundX + paddingX + messageWidth + 2, backgroundY + paddingY - 4);
         });
 
         // 모드 아이템 생성

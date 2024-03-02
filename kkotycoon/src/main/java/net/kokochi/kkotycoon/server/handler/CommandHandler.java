@@ -13,6 +13,7 @@ import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -27,11 +28,12 @@ public class CommandHandler {
         // 데이터 초기화 명령어
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 
-            // 데이터 초기화 명령어
+
             dispatcher.register(CommandManager.literal("kkc")
+                    .requires(source -> source.hasPermissionLevel(2)) // OP 권한 요구
                     .then(CommandManager.argument("playerId", StringArgumentType.string())
+                            // 데이터 초기화 명령어
                             .then(CommandManager.literal("reset")
-                                    .requires(source -> source.hasPermissionLevel(2)) // OP 권한 요구
                                     .executes(context -> {
                                         String playerId = StringArgumentType.getString(context, "playerId");
                                         ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
@@ -44,14 +46,10 @@ public class CommandHandler {
                                         Identifier responsePacketId = new Identifier(KkoTycoon.MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID);
                                         ServerPlayNetworking.send(player, responsePacketId, responseBuf);
                                         return 1;
-                                    }))));
-
-            // 코인 추가 명령어
-            dispatcher.register(CommandManager.literal("kkc")
-                    .then(CommandManager.argument("playerId", StringArgumentType.string())
+                                    }))
+                            // 코인 추가 명령어
                             .then(CommandManager.literal("addCoin")
                                     .then(CommandManager.argument("coinAmount", IntegerArgumentType.integer())
-                                            .requires(source -> source.hasPermissionLevel(2)) // OP 권한 요구
                                             .executes(context -> {
                                                 String playerId = StringArgumentType.getString(context, "playerId");
                                                 int coinAmount = IntegerArgumentType.getInteger(context, "coinAmount");
@@ -66,7 +64,8 @@ public class CommandHandler {
                                                 Identifier responsePacketId = new Identifier(KkoTycoon.MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID);
                                                 ServerPlayNetworking.send(player, responsePacketId, responseBuf);
                                                 return 1;
-                                            })))));
+                                            })))
+                    ));
 
             // 출금 명령어
             dispatcher.register(CommandManager.literal("kcoin")
@@ -94,7 +93,7 @@ public class CommandHandler {
                                 }
 
                                 playerData.setKkoCoin(playerData.getKkoCoin() - amount);
-                                ItemStack itemStack = new ItemStack(KkoTycoonItems.KkoCoin);
+                                ItemStack itemStack = new ItemStack(KkoTycoonItems.KKO_COIN);
                                 itemStack.setCustomName(Text.literal("§6" + NumberFormat.getInstance().format(amount) + "꼬코인"));
                                 player.getInventory().insertStack(itemStack);
 
@@ -102,6 +101,21 @@ public class CommandHandler {
                                 KkotycoonMainDataS2CGetPacket.encode(new KkotycoonMainDataS2CGetPacket(playerData), responseBuf);
                                 Identifier responsePacketId = new Identifier(KkoTycoon.MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID);
                                 ServerPlayNetworking.send(player, responsePacketId, responseBuf);
+                                return 1;
+                            })));
+
+            // 곡괭이 인챈트
+            dispatcher.register(CommandManager.literal("kkcset")
+                    .requires(source -> source.hasPermissionLevel(2)) // OP 권한 요구
+                    .then(CommandManager.literal("pickaxe")
+                            .executes(context -> {
+                                ServerPlayerEntity player = context.getSource().getPlayer();
+
+                                ItemStack mainHandStack = player.getMainHandStack();
+                                NbtCompound nbt = mainHandStack.getOrCreateNbt();
+                                nbt.putInt(PlayerActionEventHandler.PICKAXE_EFF_LEVEL_KEY, 3);
+                                nbt.putDouble(PlayerActionEventHandler.PICKAXE_EFF_WEIGHT_KEY, 0.5d);
+                                mainHandStack.setNbt(nbt);
                                 return 1;
                             })));
         });

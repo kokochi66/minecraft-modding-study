@@ -1,91 +1,45 @@
 package net.kokochi.kkotycoon;
 
-import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.kokochi.kkotycoon.client.data.CodexSet;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.kokochi.kkotycoon.entity.item.KkoTycoonItems;
-import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
-import net.kokochi.kkotycoon.packet.CodexC2SPostPacket;
-import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
-import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.kokochi.kkotycoon.server.handler.CommandHandler;
-import net.minecraft.item.Item;
-import net.minecraft.network.PacketByteBuf;
+import net.kokochi.kkotycoon.server.handler.PlayerActionEventHandler;
+import net.kokochi.kkotycoon.server.handler.ServerRequestHandler;
+import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ActionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KkoTycoon implements ModInitializer {
-	public static final String MOD_ID = "kkotycoon";
+    public static final String MOD_ID = "kkotycoon";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	@Override
-	public void onInitialize() {
-		// 게임 실행 될 때의 서버측 로직
-		ServerPlayNetworking.registerGlobalReceiver(
-				new Identifier(MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_REQUEST_ID), (server, player, handler, buf, responseSender) ->
-				{
-					// 사용자의 최초 도감 정보 조회
-					LOGGER.info(player.getUuid() + " codex get");
 
-					// 도감 정보를 가져온 정보를 buf화하여 클라이언트로 보내줍니다.
-					PacketByteBuf responseBuf = new PacketByteBuf(Unpooled.buffer());
-					KkotycoonMainDataS2CGetPacket.encode(new KkotycoonMainDataS2CGetPacket(ServerPlayerDataManager.getPlayerData(player)), responseBuf);
-					Identifier responsePacketId = new Identifier(MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID);
-					ServerPlayNetworking.send(player, responsePacketId, responseBuf);
-				});
+    @Override
+    public void onInitialize() {
 
-		// 도감에 아이템 등록
-		ServerPlayNetworking.registerGlobalReceiver(
-				new Identifier(MOD_ID, CodexC2SPostPacket.CODEX_POST_PACKET_REQUEST_ID), (server, player, handler, buf, responseSender) ->
-				{
-					LOGGER.info(player.getUuid() + " codex post");
-					// 패킷을 가져와서 플레이어의 코덱 정보에 저장
-					int codexIndex = CodexC2SPostPacket.decode(buf);
+        ServerRequestHandler.initDataRequestHandler();
+        ServerRequestHandler.initCodexRequestHandler();
 
+        // 명령어 생성
+        CommandHandler.initCommand();
 
-					// 해당 유저가 도감에 해당하는 아이템을 보유하고 있는지를 체크합니다.
-					Item item = CodexSet.values()[codexIndex].getItem();
-					int itemCount = player.getInventory().count(item);
-					if (itemCount < 10) {
-						// 아이템을 개수만큼 보유하고 있지 않다면 도감 등록 처리를 하지 않습니다.
-						player.sendMessage(Text.of("아이템 개수가 부족합니다."));
-						return;
-					}
+        // 아이템 추가
+        KkoTycoonItems.initModItems();
 
-					KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
-					byte[] nbtArray = playerData.getCodexArray();
-					if (nbtArray.length == 0) {
-						// 저장된 데이터가 없다면 새로 생성해줍니다.
-						CodexSet[] codexSetArray = CodexSet.values();
-						nbtArray = new byte[codexSetArray.length];
-						nbtArray[codexIndex] = 1;
-					} else if (nbtArray[codexIndex] == 1) {
-						// 이미 도감에 등록되었다면 등록 처리를 하지 않습니다.
-						player.sendMessage(Text.of("이미 도감에 등록된 아이템 입니다."));
-						return;
-					} else {
-						// 이미 있다면 도감에 데이터를 채워줍니다.
-						nbtArray[codexIndex] = 1;
-						// 아이템을 소모처리 해줍니다.
-						player.getInventory().remove(itemStack -> Item.getRawId(itemStack.getItem()) == Item.getRawId(item), 10, player.getInventory());
-					}
-
-					// 클라이언트에 응답 데이터를 내려줍니다.
-					PacketByteBuf responseBuf = new PacketByteBuf(Unpooled.buffer());
-					KkotycoonMainDataS2CGetPacket.encode(new KkotycoonMainDataS2CGetPacket(playerData), responseBuf);
-					Identifier responsePacketId = new Identifier(MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID);
-					ServerPlayNetworking.send(player, responsePacketId, responseBuf);
-					player.sendMessage(Text.of("\"" + item.getName().getString()+ "\" 아이템이 도감에 등록되었습니다!"));
-				});
-
-		// 명령어 생성
-		CommandHandler.initCommand();
-
-		// 아이템 추가
-		KkoTycoonItems.initModItems();
-	}
+		// 상인과 상호작용 불가능
+		UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+			// 마을 주민과 상호작용하는 경우
+			if (entity instanceof VillagerEntity) {
+				// 거래 UI가 열리지 않도록 이벤트를 취소
+                player.sendMessage(Text.of("§d꼬타이쿤§f에서 마을 주민§f과의 거래는 §c금지§f됩니다."));
+				return ActionResult.FAIL;
+			}
+			// 다른 엔티티와의 상호작용은 기본 동작을 유지
+			return ActionResult.PASS;
+		});
+    }
 }
