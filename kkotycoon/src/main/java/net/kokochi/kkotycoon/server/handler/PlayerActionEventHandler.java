@@ -1,6 +1,7 @@
 package net.kokochi.kkotycoon.server.handler;
 
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.kokochi.kkotycoon.entity.item.custom.RandomEnchantTicket;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 

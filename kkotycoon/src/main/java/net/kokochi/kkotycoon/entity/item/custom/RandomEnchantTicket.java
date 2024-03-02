@@ -1,5 +1,6 @@
 package net.kokochi.kkotycoon.entity.item.custom;
 
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
@@ -15,6 +16,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,11 +31,11 @@ public class RandomEnchantTicket extends Item {
         super(settings);
     }
 
-
     @Override
-    public Optional<TooltipData> getTooltipData(ItemStack stack) {
-        stack.setCustomName(Text.literal("랜덤 인챈트북 뽑기권\n확률은 비밀"));
-        return super.getTooltipData(stack);
+    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+        super.appendTooltip(stack, world, tooltip, context);
+
+        tooltip.add(Text.of("§9확률은 비밀입니다. 꼬우면 아시죠?"));
     }
 
     @Override
@@ -74,11 +76,8 @@ public class RandomEnchantTicket extends Item {
 
             // 인챈트 북 획득 시 사용자에게 어떤 인챈트북을 획득했는지 메세지를 보낸다.
             user.getInventory().insertStack(book);
-            if (!user.getAbilities().creativeMode) {
-                // 아이템 사용 시 아이템을 소모한다.
-                ticketStack.decrement(1);
-            }
-
+            // 아이템 사용 시 아이템을 소모한다.
+            ticketStack.decrement(1);
             return TypedActionResult.success(ticketStack, world.isClient());
         } else {
             return TypedActionResult.pass(user.getStackInHand(hand));
@@ -87,13 +86,13 @@ public class RandomEnchantTicket extends Item {
 
     private Enchantment pickRandomEnchantment() {
         double chance = random.nextDouble() * 100;
-        if (chance < 0.093) {
+        if (chance < 0.293) {
             return pickEnchantmentFromTier(SS_TIER); // SS티어
-        } else if (chance < 5.816) {
+        } else if (chance < 6.516) {
             return pickEnchantmentFromTier(S_TIER); // S티어
-        } else if (chance < 23.85) {
+        } else if (chance < 25.85) {
             return pickEnchantmentFromTier(A_TIER); // A티어
-        } else if (chance < 70.609) {
+        } else if (chance < 71.609) {
             return pickEnchantmentFromTier(B_TIER); // B티어
         } else {
             return pickEnchantmentFromTier(C_TIER); // C티어
