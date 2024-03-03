@@ -141,7 +141,6 @@ public class CommandHandler {
                                 ServerPlayNetworking.send(player, responsePacketId, responseBuf);
                                 return 1;
                             })));
-
             // 곡괭이 인챈트
             dispatcher.register(CommandManager.literal("kkcset")
                     .requires(source -> source.hasPermissionLevel(2)) // OP 권한 요구

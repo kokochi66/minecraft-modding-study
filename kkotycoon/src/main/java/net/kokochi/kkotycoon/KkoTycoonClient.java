@@ -38,7 +38,7 @@ public class KkoTycoonClient implements ClientModInitializer {
     private static final KeyBinding CODEX_OPEN_KEY = KeyBindingHelper.registerKeyBinding(new KeyBinding(
             "key.kkotycoon.o_key", // 키바인딩의 이름에 대한 번역 키
             InputUtil.Type.KEYSYM, // 키바인딩 타입 (키보드)
-            GLFW.GLFW_KEY_O, // 'o' 키에 대한 GLFW 키 코드
+            GLFW.GLFW_KEY_V, // 'v' 키에 대한 GLFW 키 코드
             "category.kkotycoon.keys" // 키바인딩 카테고리에 대한 번역 키
     ));
 

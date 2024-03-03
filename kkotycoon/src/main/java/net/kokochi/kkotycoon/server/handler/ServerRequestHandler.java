@@ -31,7 +31,8 @@ public class ServerRequestHandler {
                 {
                     // 기본 사용자 데이터를 내려줍니다.
                     PacketByteBuf responseBuf = new PacketByteBuf(Unpooled.buffer());
-                    KkotycoonMainDataS2CGetPacket.encode(new KkotycoonMainDataS2CGetPacket(ServerPlayerDataManager.getPlayerData(player)), responseBuf);
+                    KkotycoonMainDataS2CGetPacket kkotycoonMainDataS2CGetPacket = new KkotycoonMainDataS2CGetPacket(ServerPlayerDataManager.getPlayerData(player));
+                    KkotycoonMainDataS2CGetPacket.encode(kkotycoonMainDataS2CGetPacket, responseBuf);
                     Identifier responsePacketId = new Identifier(MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID);
                     ServerPlayNetworking.send(player, responsePacketId, responseBuf);
                 });

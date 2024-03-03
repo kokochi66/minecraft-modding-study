@@ -17,7 +17,6 @@ import net.minecraft.util.Identifier;
 import java.awt.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -162,6 +161,9 @@ public class CodexScreen extends Screen {
 
             if (stackIndex >= itemStacks.size()) {
                 stackIndex = itemStacks.size() - 1;
+                if (stackIndex == -1) {
+                    break;
+                }
             }
             ItemStack itemStack = itemStacks.get(stackIndex);
             // 마우스가 아이템 슬롯 위에 있는지 확인
@@ -209,6 +211,12 @@ public class CodexScreen extends Screen {
                         && mouseY >= y
                         && mouseY <= y + slotBoxSize) {
                     int selectedItemIndex = (this.currentPage * 105) + i;
+                    if (selectedItemIndex >= itemStacks.size()) {
+                        selectedItemIndex = itemStacks.size() - 1;
+                        if (selectedItemIndex == -1) {
+                            break;
+                        }
+                    }
                     Integer codexItemId = ClientPlayerDataManager.codexList.get(selectedItemIndex);
 
                     // 서버로 도감 완료 요청을 보냅니다.

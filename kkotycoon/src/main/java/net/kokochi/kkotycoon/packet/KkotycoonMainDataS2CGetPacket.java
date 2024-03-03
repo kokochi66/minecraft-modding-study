@@ -21,7 +21,6 @@ public class KkotycoonMainDataS2CGetPacket {
 
     public static final String CODEX_GET_PACKET_REQUEST_ID = "kkotycoon_data_get_request";
     public static final String CODEX_GET_PACKET_RESPONSE_ID = "kkotycoon_data_get_response";
-    public static final String CODEX_LIST_NBT_KEY = "codex_list_nbt_key";
     public KkotycoonMainDataS2CGetPacket(KkotycoonPlayerData playerData) {
         this.playerData = playerData;
         this.codexList = ServerPlayerDataManager.codexItemIdList;
