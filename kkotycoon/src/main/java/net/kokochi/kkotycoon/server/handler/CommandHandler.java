@@ -7,14 +7,13 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.kokochi.kkotycoon.KkoTycoon;
+import net.kokochi.kkotycoon.entity.codex.CodexInfo;
+import net.kokochi.kkotycoon.entity.codex.CodexSet;
 import net.kokochi.kkotycoon.entity.item.KkoTycoonItems;
 import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
 import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.kokochi.kkotycoon.packet.ShopScreenS2CPacket;
-import net.minecraft.command.argument.ItemPredicateArgumentType;
-import net.minecraft.command.argument.ItemSlotArgumentType;
-import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,10 +23,11 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CommandHandler {
 
@@ -84,17 +84,17 @@ public class CommandHandler {
                                         return 1;
                                     }))
                     )
-                    // 도감을 등록합니다.
-                    .then(CommandManager.literal("updateCodex")
-                            .then(CommandManager.argument("codexSlot", IntegerArgumentType.integer())
+                    // 도감에 커스텀 아이템을 추가합니다.
+                    .then(CommandManager.literal("addCodex")
+                            .then(CommandManager.argument("count", IntegerArgumentType.integer())
                                     .executes(context -> {
-                                        int codexSlot = IntegerArgumentType.getInteger(context, "codexSlot");
+                                        int count = IntegerArgumentType.getInteger(context, "count");
                                         ServerPlayerEntity player = context.getSource().getPlayer();
 
                                         ItemStack mainHandStack = player.getMainHandStack();
-                                        List<Integer> codexItemIdList = ServerPlayerDataManager.codexItemIdList;
+                                        List<CodexInfo> codexInfos = ServerPlayerDataManager.codexInfoList;
                                         int rawId = Item.getRawId(mainHandStack.getItem());
-                                        codexItemIdList.set(codexSlot, rawId);
+                                        codexInfos.add(new CodexInfo(rawId, count));
 
                                         // 클라이언트에 응답 데이터를 내려줍니다.
                                         PacketByteBuf responseBuf = new PacketByteBuf(Unpooled.buffer());
@@ -103,6 +103,24 @@ public class CommandHandler {
                                         ServerPlayNetworking.send(player, responsePacketId, responseBuf);
                                         return 1;
                                     })))
+                    // 도감 정보를 기본값으로 초기화 합니다.
+                    .then(CommandManager.literal("clearCodex")
+                            .executes(context -> {
+                                ServerPlayerEntity player = context.getSource().getPlayer();
+
+                                List<CodexInfo> codexInfos = ServerPlayerDataManager.codexInfoList;
+                                codexInfos.clear();
+                                codexInfos.addAll(Arrays.stream(CodexSet.values())
+                                        .map(codexSet -> new CodexInfo(Item.getRawId(codexSet.getItem()), codexSet.getCount()))
+                                        .collect(Collectors.toList()));
+
+                                // 클라이언트에 응답 데이터를 내려줍니다.
+                                PacketByteBuf responseBuf = new PacketByteBuf(Unpooled.buffer());
+                                KkotycoonMainDataS2CGetPacket.encode(new KkotycoonMainDataS2CGetPacket(ServerPlayerDataManager.getPlayerData(player)), responseBuf);
+                                Identifier responsePacketId = new Identifier(KkoTycoon.MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID);
+                                ServerPlayNetworking.send(player, responsePacketId, responseBuf);
+                                return 1;
+                            }))
             );
 
             // 출금 명령어

@@ -2,6 +2,7 @@ package net.kokochi.kkotycoon.packet;
 
 
 import net.kokochi.kkotycoon.KkoTycoon;
+import net.kokochi.kkotycoon.entity.codex.CodexInfo;
 import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
 import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.minecraft.network.PacketByteBuf;
@@ -17,13 +18,19 @@ import java.util.List;
 public class KkotycoonMainDataS2CGetPacket {
     public static final Logger LOGGER = LoggerFactory.getLogger(KkoTycoon.MOD_ID);
     public KkotycoonPlayerData playerData;
-    public List<Integer> codexList;
+    public List<CodexInfo> codexList;
 
     public static final String CODEX_GET_PACKET_REQUEST_ID = "kkotycoon_data_get_request";
     public static final String CODEX_GET_PACKET_RESPONSE_ID = "kkotycoon_data_get_response";
+    // 서버 용도로만 사용되는 constructor 입니다. (서버 데이터 매니저를 사용하기 때문에)
     public KkotycoonMainDataS2CGetPacket(KkotycoonPlayerData playerData) {
         this.playerData = playerData;
-        this.codexList = ServerPlayerDataManager.codexItemIdList;
+        this.codexList = ServerPlayerDataManager.codexInfoList;
+    }
+
+    public KkotycoonMainDataS2CGetPacket(KkotycoonPlayerData playerData, List<CodexInfo> codexList) {
+        this.playerData = playerData;
+        this.codexList = codexList;
     }
 
     public static void encode(KkotycoonMainDataS2CGetPacket packet, PacketByteBuf buf) {
@@ -37,14 +44,15 @@ public class KkotycoonMainDataS2CGetPacket {
             buf.writeLong(localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         }
 
-        int[] codexArray = new int[packet.codexList.size()];
+        buf.writeInt(packet.codexList.size());
         for (int i=0;i<packet.codexList.size();i++) {
-            codexArray[i] = packet.codexList.get(i);
+            CodexInfo codexInfo = packet.codexList.get(i);
+            buf.writeInt(codexInfo.getItemId());
+            buf.writeInt(codexInfo.getCount());
         }
-        buf.writeIntArray(codexArray);
     }
 
-    public static KkotycoonPlayerData decode(PacketByteBuf buf) {
+    public static KkotycoonMainDataS2CGetPacket decode(PacketByteBuf buf) {
         KkotycoonPlayerData data = new KkotycoonPlayerData();
         data.setCodexArray(buf.readByteArray());
         data.setKkoCoin(buf.readLong());
@@ -55,15 +63,16 @@ public class KkotycoonMainDataS2CGetPacket {
         for (int i = 0; i < stackSize; i++) {
             codexLevelUpStack.add(Instant.ofEpochMilli(buf.readLong()).atZone(ZoneId.systemDefault()).toLocalDateTime());
         }
-        return data;
+
+        int codexSize = buf.readInt();
+        List<CodexInfo> bufCodexInfos = new ArrayList<>();
+        for (int i=0;i<codexSize;i++) {
+            int itemId = buf.readInt();
+            int count = buf.readInt();
+            bufCodexInfos.add(new CodexInfo(itemId, count));
+        }
+
+        return new KkotycoonMainDataS2CGetPacket(data, bufCodexInfos);
     }
 
-    public static List<Integer> decodeCodexArray(PacketByteBuf buf) {
-        int[] ints = buf.readIntArray();
-        List<Integer> list = new ArrayList<>();
-        for (int i=0;i<ints.length;i++) {
-            list.add(ints[i]);
-        }
-        return list;
-    }
 }

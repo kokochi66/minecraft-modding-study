@@ -7,6 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.RedstoneOreBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -64,26 +65,7 @@ public class BlockMixin {
                         }
                     }
                 }
-            } else if (state.isIn(TagKey.of(Registries.BLOCK.getKey(), new Identifier("minecraft", "crops")))) {
-                ItemStack mainHandStack = player.getMainHandStack();
-                if (mainHandStack.hasNbt()) {
-                    NbtCompound nbt = mainHandStack.getNbt();
-                    if (nbt.contains(PICKAXE_EFF_LEVEL_KEY)) {
-                        int level = nbt.getInt(PICKAXE_EFF_LEVEL_KEY);
-                        double chance = nbt.getDouble(PICKAXE_EFF_WEIGHT_KEY); // 퍼센트로 변환
-                        if (Math.random() < chance) {
-                            player.sendMessage(Text.of("아이템 추가 드랍"));
-                            ItemStack itemStack = state.getBlock().getDroppedStacks(state, (ServerWorld) world, pos, blockEntity)
-                                    .stream().findFirst().orElse(null);
-                            if (itemStack != null) {
-                                itemStack.setCount(level);
-                                Block.dropStack(world, pos, itemStack);
-                            }
-                        }
-                    }
-                }
             }
-
         }
     }
 }

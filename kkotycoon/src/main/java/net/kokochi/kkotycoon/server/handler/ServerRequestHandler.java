@@ -2,6 +2,7 @@ package net.kokochi.kkotycoon.server.handler;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.kokochi.kkotycoon.entity.codex.CodexInfo;
 import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
 import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.kokochi.kkotycoon.entity.product.KkoShopProduct;
@@ -46,10 +47,10 @@ public class ServerRequestHandler {
                 {
                     // 패킷을 가져와서 플레이어의 코덱 정보에 저장
                     int codexItemId = CodexC2SPostPacket.decode(buf);
-                    List<Integer> codexList = ServerPlayerDataManager.getCodexList(server);
+                    List<CodexInfo> codexList = ServerPlayerDataManager.getCodexList(server);
                     int codexIndex = -1;
                     for (int i=0;i<codexList.size();i++) {
-                        if (codexList.get(i) == codexItemId) {
+                        if (codexList.get(i).getItemId() == codexItemId) {
                             codexIndex = i;
                         }
                     }
@@ -57,7 +58,8 @@ public class ServerRequestHandler {
                     // 해당 유저가 도감에 해당하는 아이템을 보유하고 있는지를 체크합니다.
                     Item item = Item.byRawId(codexItemId);
                     int itemCount = player.getInventory().count(item);
-                    if (itemCount < 10) {
+                    int needCount = codexList.get(codexIndex).getCount();
+                    if (itemCount < needCount) {
                         // 아이템을 개수만큼 보유하고 있지 않다면 도감 등록 처리를 하지 않습니다.
                         player.sendMessage(Text.of("아이템 개수가 부족합니다."));
                         return;
@@ -79,7 +81,7 @@ public class ServerRequestHandler {
                         // 도감 보상 스택도 추가해줍니다.
                         playerData.getCodexLevelUpStack().add(LocalDateTime.now());
                         // 아이템을 소모처리 해줍니다.
-                        player.getInventory().remove(itemStack -> Item.getRawId(itemStack.getItem()) == Item.getRawId(item), 10, player.getInventory());
+                        player.getInventory().remove(itemStack -> Item.getRawId(itemStack.getItem()) == Item.getRawId(item), needCount, player.getInventory());
                     }
 
                     // 클라이언트에 응답 데이터를 내려줍니다.

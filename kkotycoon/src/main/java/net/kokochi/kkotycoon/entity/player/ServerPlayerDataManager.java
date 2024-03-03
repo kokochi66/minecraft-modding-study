@@ -1,8 +1,8 @@
 package net.kokochi.kkotycoon.entity.player;
 
 import net.kokochi.kkotycoon.KkoTycoon;
+import net.kokochi.kkotycoon.entity.codex.CodexInfo;
 import net.kokochi.kkotycoon.entity.codex.CodexSet;
-import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
@@ -19,16 +19,14 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.*;
-
 public class ServerPlayerDataManager extends PersistentState {
-    public static HashMap<UUID, KkotycoonPlayerData> playerDataMap;
-    public static List<Integer> codexItemIdList;
+    public static HashMap<UUID, KkotycoonPlayerData> playerDataMap = new HashMap<>();
+    public static List<CodexInfo> codexInfoList = new ArrayList<>();
 
     public ServerPlayerDataManager() {
         playerDataMap = new HashMap<>();
-        codexItemIdList = Arrays.stream(CodexSet.values())
-                .map(codexSet -> Item.getRawId(codexSet.getItem()))
+        codexInfoList = Arrays.stream(CodexSet.values())
+                .map(codexSet -> new CodexInfo(Item.getRawId(codexSet.getItem()), codexSet.getCount()))
                 .collect(Collectors.toList());
     }
 
@@ -52,10 +50,10 @@ public class ServerPlayerDataManager extends PersistentState {
         });
         nbt.put("players", playersNbt);
 
-        int[] codexArray = codexItemIdList.stream() // Stream<Integer> 생성
-                .mapToInt(Integer::intValue) // IntStream 생성
-                .toArray(); // int[]로 변환
-        nbt.putIntArray("codexItemIdList", codexArray);
+        nbt.putIntArray("codexItemIdList", codexInfoList.stream()
+                .mapToInt(CodexInfo::getItemId).toArray());
+        nbt.putIntArray("codexItemCountList", codexInfoList.stream()
+                .mapToInt(CodexInfo::getCount).toArray());
         return nbt;
     }
 
@@ -83,23 +81,28 @@ public class ServerPlayerDataManager extends PersistentState {
             state.playerDataMap.put(uuid, playerData);
         });
 
-        int[] codexIemIdArray = tag.getIntArray("codexItemIdList");
-        if (ArrayUtils.isEmpty(codexIemIdArray)) {
-            codexIemIdArray = Arrays.stream(CodexSet.values())
-                    .mapToInt(codexSet -> Item.getRawId(codexSet.getItem()))
-                    .toArray();
+        int[] codexItemIdList = tag.getIntArray("codexItemIdList");
+        int[] codexItemCountList = tag.getIntArray("codexItemCountList");
+        List<CodexInfo> serverCodexInfoList = new ArrayList<>();
+
+        for (int i=0;i<codexItemIdList.length;i++) {
+            serverCodexInfoList.add(new CodexInfo(codexItemIdList[i], codexItemCountList[i]));
         }
-        state.codexItemIdList.clear();
-        state.codexItemIdList.addAll(Arrays.stream(codexIemIdArray).boxed().collect(Collectors.toList()));
+
+        if (serverCodexInfoList.size() == 0) {
+            serverCodexInfoList = Arrays.stream(CodexSet.values())
+                    .map(codexSet -> new CodexInfo(Item.getRawId(codexSet.getItem()), codexSet.getCount()))
+                    .collect(Collectors.toList());
+        }
+        state.codexInfoList.clear();
+        state.codexInfoList.addAll(serverCodexInfoList);
 
         return state;
     }
 
 
     public static ServerPlayerDataManager getServerState(MinecraftServer server) {
-        ServerWorld world = server.getWorld(World.OVERWORLD);
-        String worldKey = world.getRegistryKey().getValue().toString();
-        PersistentStateManager persistentStateManager = world.getPersistentStateManager();
+        PersistentStateManager persistentStateManager = server.getWorld(World.OVERWORLD).getPersistentStateManager();
         ServerPlayerDataManager state = persistentStateManager.getOrCreate(nbt -> {
             // nbt가 있다면 nbt 정보를 불러옵니다.
             return createFromNbt(nbt);
@@ -107,8 +110,6 @@ public class ServerPlayerDataManager extends PersistentState {
             // 서버 정보가 없다면 기본 데이터를 선언합니다.
             return new ServerPlayerDataManager();
         }, KkoTycoon.MOD_ID);
-        HashMap<UUID, KkotycoonPlayerData> playerDataMap1 = state.playerDataMap;
-        List<Integer> codexItemIdList1 = state.codexItemIdList;
         state.markDirty();
         return state;
     }
@@ -118,9 +119,9 @@ public class ServerPlayerDataManager extends PersistentState {
         return serverState.playerDataMap.computeIfAbsent(player.getUuid(), uuid -> new KkotycoonPlayerData());
     }
 
-    public static List<Integer> getCodexList(MinecraftServer server) {
+    public static List<CodexInfo> getCodexList(MinecraftServer server) {
         ServerPlayerDataManager serverState = getServerState(server);
-        return serverState.codexItemIdList;
+        return serverState.codexInfoList;
     }
 
     public static KkotycoonPlayerData resetPlayerData(LivingEntity player) {

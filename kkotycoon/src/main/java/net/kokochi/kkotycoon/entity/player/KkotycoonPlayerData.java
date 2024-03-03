@@ -25,8 +25,6 @@ public class KkotycoonPlayerData {
     private static final ChronoUnit REWARD_TIMES = ChronoUnit.MINUTES;
     // 현재 쌓여있는 보상 계산 로직
     public long calculCodexReward() {
-
-
         long totalReward = 0;
         int codexCount = countCodex() - codexLevelUpStack.size();
         LocalDateTime processingTime = this.lastReceivedCodexRewardDate;

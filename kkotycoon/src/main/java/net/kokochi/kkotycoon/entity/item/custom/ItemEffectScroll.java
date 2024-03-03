@@ -36,7 +36,7 @@ public class ItemEffectScroll extends Item {
         tooltip.add(Text.of("§6오른손 §f: 아이템 강화 주문서를 듭니다."));
         tooltip.add(Text.of("§6왼손 §f: 강화하고자 하는 장비를 듭니다."));
         tooltip.add(Text.of("§f마우스 우클릭을 누릅니다."));
-        tooltip.add(Text.of("§e곡괭이, 괭이, 검, 활 에만 사용이 가능합니다."));
+        tooltip.add(Text.of("§e곡괭이, 검, 활 에만 사용이 가능합니다."));
     }
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
@@ -88,48 +88,45 @@ public class ItemEffectScroll extends Item {
     private int getEnhancementLevel(Item item) {
         int chance = random.nextInt(100);
         if (chance < 45) return getLevelValue(item, 1); // 60% 확률로 1레벨
-        else if (chance < 80) return getLevelValue(item, 2); // 추가 35% 확률로 2레벨
+        else if (chance < 90) return getLevelValue(item, 2); // 추가 35% 확률로 2레벨
         else return getLevelValue(item, 3); // 나머지 5% 확률로 3레벨
     }
 
     private double getEnhancementWeight() {
         int chance = random.nextInt(100);
-        if (chance < 30) return (random.nextInt(9) + 1d) * 0.01d;
-        else if (chance < 55) return (random.nextInt(10) + 11d) * 0.01d;
-        else if (chance < 75) return (random.nextInt(10) + 21d) * 0.01d;
+        if (chance < 35) return (random.nextInt(9) + 1d) * 0.01d;
+        else if (chance < 60) return (random.nextInt(10) + 11d) * 0.01d;
+        else if (chance < 80) return (random.nextInt(10) + 21d) * 0.01d;
         else if (chance < 90) return (random.nextInt(10) + 31d) * 0.01d;
         else return (random.nextInt(10) + 41d) * 0.01d;
     }
 
     private String getLevelKey(Item item) {
         if (item instanceof PickaxeItem) return PICKAXE_EFF_LEVEL_KEY;
-        else if (item instanceof HoeItem) return HOE_EFF_LEVEL_KEY;
         else if (item instanceof SwordItem) return SWORD_EFF_LEVEL_KEY;
         else if (item instanceof BowItem) return BOW_EFF_LEVEL_KEY;
         return "";
     }
 
     private int getLevelValue(Item item, int level) {
-        if (item instanceof PickaxeItem) return level;
-        else if (item instanceof HoeItem) return level * 2;
-        else if (item instanceof SwordItem) return level == 1 ? 15 : level == 2 ? 25 : 45;
-        else if (item instanceof BowItem) return level == 1 ? 15 : level == 2 ? 25 : 45;
+        if (item instanceof PickaxeItem) return level == 1 ? 1 : level == 2 ? 2 : 5;
+        else if (item instanceof HoeItem) return level == 1 ? 2 : level == 2 ? 5 : 10;
+        else if (item instanceof SwordItem) return level == 1 ? 100 : level == 2 ? 200 : 350;
+        else if (item instanceof BowItem) return level == 1 ? 50 : level == 2 ? 100 : 200;
         return 0;
     }
 
     private String getWeightKey(Item item) {
         if (item instanceof PickaxeItem) return PICKAXE_EFF_WEIGHT_KEY;
-        else if (item instanceof HoeItem) return HOE_EFF_WEIGHT_KEY;
         else if (item instanceof SwordItem) return SWORD_EFF_WEIGHT_KEY;
         else if (item instanceof BowItem) return BOW_EFF_WEIGHT_KEY;
         return "";
     }
 
     private String getMessage(Item item, int level, int chance) {
-        if (item instanceof PickaxeItem) return "광물 블럭 채굴 시 §4" + chance + "%§f 확률로 주괴 아이템 §2" + level + "개 §f추가 드랍";
-        else if (item instanceof HoeItem) return "농작물 수확 시 §4" + chance + "%§f 확률로 농작물 아이템 §2" + level + "개 §f추가 드랍";
-        else if (item instanceof SwordItem) return "검으로 공격 시 §4" + chance + "%§f 확률로 치명타 데미지 §2" + level + "%§f 증가";
-        else if (item instanceof BowItem) return "활로 공격 시 §4" + chance + "%§f 확률로 데미지 §2" + level + "%§f 증가";
+        if (item instanceof PickaxeItem) return "광물 블럭 채굴 시 §4" + chance + "%§f 확률로 광물 아이템 §2" + level + "개 §f추가 드랍";
+        else if (item instanceof SwordItem) return "검으로 공격 시 §4" + chance + "%§f 확률로 §2" + level + "%§f 추가 데미지";
+        else if (item instanceof BowItem) return "활로 공격 시 §4" + chance + "%§f 확률로 §2" + level + "%§f 추가 데미지";
         return "";
     }
 }

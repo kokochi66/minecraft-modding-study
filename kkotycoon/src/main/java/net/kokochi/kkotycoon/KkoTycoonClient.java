@@ -55,9 +55,9 @@ public class KkoTycoonClient implements ClientModInitializer {
                 new Identifier(KkoTycoon.MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID), (client, handler, buf, responseSender) ->
                 {
                     // 서버로부터 받은 도감 정보를 디코딩하는 로직
-                    KkotycoonPlayerData playerData = KkotycoonMainDataS2CGetPacket.decode(buf);
-                    ClientPlayerDataManager.setPlayerData(playerData);
-                    ClientPlayerDataManager.setCodexList(KkotycoonMainDataS2CGetPacket.decodeCodexArray(buf));
+                    KkotycoonMainDataS2CGetPacket decode = KkotycoonMainDataS2CGetPacket.decode(buf);
+                    ClientPlayerDataManager.setPlayerData(decode.playerData);
+                    ClientPlayerDataManager.setCodexList(decode.codexList);
                 });
 
         ClientPlayNetworking.registerGlobalReceiver(

@@ -2,6 +2,7 @@ package net.kokochi.kkotycoon.client.screen;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.kokochi.kkotycoon.entity.codex.CodexInfo;
 import net.kokochi.kkotycoon.packet.CodexC2SPostPacket;
 import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
 import net.minecraft.client.gui.DrawContext;
@@ -18,7 +19,9 @@ import java.awt.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static net.kokochi.kkotycoon.KkoTycoon.MOD_ID;
@@ -78,14 +81,14 @@ public class CodexScreen extends Screen {
             }
         }
 
-
+        Map<Integer, CodexInfo> codexInfoMap = ClientPlayerDataManager.codexList.stream().collect(Collectors.toMap(CodexInfo::getItemId, Function.identity()));
         itemStacks = ClientPlayerDataManager.codexList.stream()
-                .map(id -> new ItemStack(Item.byRawId(id)))
+                .map(codexInfo ->  new ItemStack(Item.byRawId(codexInfo.getItemId())))
                 .collect(Collectors.toList());
         itemTooltips = itemStacks.stream()
                 .map(itemStack ->
                         Text.of(getTooltipFromItem(Objects.requireNonNull(this.client), itemStack)
-                                .stream().findFirst().orElse(Text.literal("none")).getString() + "(10)")
+                                .stream().findFirst().orElse(Text.literal("none")).getString() + "("+ codexInfoMap.get(Item.getRawId(itemStack.getItem())).getCount() + ")")
                 )
                 .collect(Collectors.toList());
 
@@ -137,7 +140,7 @@ public class CodexScreen extends Screen {
                 achievedCount++;
             }
         }
-        String titleText = "도감 달성도 " + achievedCount + "/300";
+        String titleText = "도감 달성도 " + achievedCount + "/" + itemStacks.size();
         int titleWidth = textRenderer.getWidth(titleText); // 텍스트 너비 계산
         int titleX = this.width / 2 - titleWidth / 2; // 텍스트 X 좌표 (가운데 정렬)
         int titleY = 30; // 텍스트 Y 좌표 (상단에서부터의 거리)
@@ -151,6 +154,9 @@ public class CodexScreen extends Screen {
             int y = rectangle.y;
             int slotBoxSize = rectangle.width;
             int stackIndex = (currentPage * 105) + i;
+            if (stackIndex >= itemStacks.size()) {
+                break;
+            }
 
             // 도감 달성 여부를 확인하여, 도감을 달성했다면 초록색 배경을 칠해줍니다.
             if (stackIndex < codexArray.length && codexArray[stackIndex] == 1) {
@@ -159,12 +165,6 @@ public class CodexScreen extends Screen {
                 context.fill(x, y, x + slotBoxSize, y + slotBoxSize, 0x88555555);
             }
 
-            if (stackIndex >= itemStacks.size()) {
-                stackIndex = itemStacks.size() - 1;
-                if (stackIndex == -1) {
-                    break;
-                }
-            }
             ItemStack itemStack = itemStacks.get(stackIndex);
             // 마우스가 아이템 슬롯 위에 있는지 확인
             if (mouseX >= x && mouseX <= x + slotBoxSize && mouseY >= y && mouseY <= y + slotBoxSize) {
@@ -212,16 +212,13 @@ public class CodexScreen extends Screen {
                         && mouseY <= y + slotBoxSize) {
                     int selectedItemIndex = (this.currentPage * 105) + i;
                     if (selectedItemIndex >= itemStacks.size()) {
-                        selectedItemIndex = itemStacks.size() - 1;
-                        if (selectedItemIndex == -1) {
-                            break;
-                        }
+                        break;
                     }
-                    Integer codexItemId = ClientPlayerDataManager.codexList.get(selectedItemIndex);
+                    CodexInfo codexInfo = ClientPlayerDataManager.codexList.get(selectedItemIndex);
 
                     // 서버로 도감 완료 요청을 보냅니다.
                     PacketByteBuf packetByteBuf = new PacketByteBuf(Unpooled.buffer());
-                    CodexC2SPostPacket.encode(new CodexC2SPostPacket(codexItemId), packetByteBuf);
+                    CodexC2SPostPacket.encode(new CodexC2SPostPacket(codexInfo.getItemId()), packetByteBuf);
                     Identifier identifier = new Identifier(MOD_ID, CodexC2SPostPacket.CODEX_POST_PACKET_REQUEST_ID);
                     ClientPlayNetworking.send(identifier, packetByteBuf);
                 }
