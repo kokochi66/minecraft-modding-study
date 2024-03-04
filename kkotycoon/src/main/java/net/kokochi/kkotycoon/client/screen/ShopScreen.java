@@ -150,7 +150,7 @@ public class ShopScreen extends Screen {
 
             // 가격 텍스트
             if (isTodayFirstPurchase) {
-                context.drawText(textRenderer, Text.of("1일 1회 무료구매(하나만)"),
+                context.drawText(textRenderer, Text.of("1일 1회 무료(4개 중 하나만)"),
                         boxPosX + itemOutSidePos + itemOutSideHeight + itemOutSideMargin, boxPosY + itemOutSidePos + 12, 0xFFFFFF, true);
             } else {
                 context.drawText(textRenderer, Text.of("가격 :§6" + NumberFormat.getInstance().format(kkoShopProduct.getPrice()) + "kc"),

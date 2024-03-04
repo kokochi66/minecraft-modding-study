@@ -2,6 +2,8 @@ package net.kokochi.kkotycoon.mixin;
 
 
 import com.google.common.collect.Multimap;
+import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
+import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -18,6 +20,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,7 +34,6 @@ import static net.kokochi.kkotycoon.server.handler.PlayerActionEventHandler.*;
 
 @Mixin(PlayerEntity.class)
 public class PlayerEntityMixin {
-    @Shadow @Final public PlayerScreenHandler playerScreenHandler;
 
     @Inject(method = "attack", at = @At("TAIL"), cancellable = true)
     private void injectAttack(Entity target,
@@ -73,6 +75,26 @@ public class PlayerEntityMixin {
                 }
 
 
+            }
+        }
+    }
+
+    @Inject(method = "tick", at = @At("TAIL"), cancellable = true)
+    private void injectTick(CallbackInfo ci) {
+        PlayerEntity playerEntity = (PlayerEntity) (Object) this;
+        // 사용자의 이동거리 저장
+        if (!playerEntity.getWorld().isClient) {
+            KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(playerEntity);
+            if (playerData.getPreviousPosition() == null) {
+                playerData.setPreviousPosition(playerEntity.getPos());
+            } else {
+                Vec3d currentPosition = playerEntity.getPos();
+                double distanceMoved = playerData.getPreviousPosition().distanceTo(currentPosition);
+                if (distanceMoved > 0) {
+
+                    playerData.setAccumulatedDistance(playerData.getAccumulatedDistance() + distanceMoved);
+                }
+                playerData.setPreviousPosition(currentPosition);
             }
         }
     }

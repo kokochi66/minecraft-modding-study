@@ -1,6 +1,8 @@
 package net.kokochi.kkotycoon.entity.player;
 
 
+import net.minecraft.util.math.Vec3d;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -13,11 +15,28 @@ public class KkotycoonPlayerData {
     private List<LocalDateTime> codexLevelUpStack;
     private LocalDateTime lastPurchaseProductDate;
 
+
+    // 누적 데이터
+    private double accumulatedDistance;     // 누적 이동 거리
+    private Vec3d previousPosition;
+    private int accumulatedBreakOreBlock;            // 누적 캔 광물 블록
+    private int accumulatedBreakCropBlock;          // 누적 캔 농작물 블록
+    private int accumulatedBlock;          // 누적 캔블록
+    private int accumulatedKilledMonster;              // 누적 몬스터 킬 수
+    private int accumulatedKilledAnimal;          // 누적 동물 킬 수
+    private double accumulatedDamaged;      // 누적 입은 데미지 량
+    private double accumulatedAttack;       // 누적 입힌 피해량
+    private long accumulatedPlayTime;       // 누적 플레이 타임
+    private LocalDateTime loginDate;        // 접속시간
+    private int accumulatedOnBlock;         // 누적 설치 블록 개수
+
+
     public KkotycoonPlayerData() {
         this.codexArray = new byte[350];
         this.kkoCoin = 0L;
         this.lastReceivedCodexRewardDate = LocalDateTime.now();
         this.codexLevelUpStack = new ArrayList<>();
+        this.accumulatedDistance = 0.0d;
     }
 
 
@@ -98,5 +117,101 @@ public class KkotycoonPlayerData {
 
     public void setLastPurchaseProductDate(LocalDateTime lastPurchaseProductDate) {
         this.lastPurchaseProductDate = lastPurchaseProductDate;
+    }
+
+    public double getAccumulatedDistance() {
+        return accumulatedDistance;
+    }
+
+    public void setAccumulatedDistance(double accumulatedDistance) {
+        this.accumulatedDistance = accumulatedDistance;
+    }
+
+    public Vec3d getPreviousPosition() {
+        return previousPosition;
+    }
+
+    public void setPreviousPosition(Vec3d previousPosition) {
+        this.previousPosition = previousPosition;
+    }
+
+    public int getAccumulatedBreakOreBlock() {
+        return accumulatedBreakOreBlock;
+    }
+
+    public void setAccumulatedBreakOreBlock(int accumulatedBreakOreBlock) {
+        this.accumulatedBreakOreBlock = accumulatedBreakOreBlock;
+    }
+
+    public int getAccumulatedBreakCropBlock() {
+        return accumulatedBreakCropBlock;
+    }
+
+    public void setAccumulatedBreakCropBlock(int accumulatedBreakCropBlock) {
+        this.accumulatedBreakCropBlock = accumulatedBreakCropBlock;
+    }
+
+    public int getAccumulatedKilledMonster() {
+        return accumulatedKilledMonster;
+    }
+
+    public void setAccumulatedKilledMonster(int accumulatedKilledMonster) {
+        this.accumulatedKilledMonster = accumulatedKilledMonster;
+    }
+
+    public int getAccumulatedKilledAnimal() {
+        return accumulatedKilledAnimal;
+    }
+
+    public void setAccumulatedKilledAnimal(int accumulatedKilledAnimal) {
+        this.accumulatedKilledAnimal = accumulatedKilledAnimal;
+    }
+
+    public double getAccumulatedDamaged() {
+        return accumulatedDamaged;
+    }
+
+    public void setAccumulatedDamaged(double accumulatedDamaged) {
+        this.accumulatedDamaged = accumulatedDamaged;
+    }
+
+    public double getAccumulatedAttack() {
+        return accumulatedAttack;
+    }
+
+    public void setAccumulatedAttack(double accumulatedAttack) {
+        this.accumulatedAttack = accumulatedAttack;
+    }
+
+    public long getAccumulatedPlayTime() {
+        return accumulatedPlayTime;
+    }
+
+    public void setAccumulatedPlayTime(long accumulatedPlayTime) {
+        this.accumulatedPlayTime = accumulatedPlayTime;
+    }
+
+    public int getAccumulatedOnBlock() {
+        return accumulatedOnBlock;
+    }
+
+    public void setAccumulatedOnBlock(int accumulatedOnBlock) {
+        this.accumulatedOnBlock = accumulatedOnBlock;
+    }
+
+    public int getAccumulatedBlock() {
+        return accumulatedBlock;
+    }
+
+    public void setAccumulatedBlock(int accumulatedBlock) {
+        this.accumulatedBlock = accumulatedBlock;
+    }
+
+    public LocalDateTime getLoginDate() {
+        return loginDate;
+    }
+
+    public void setLoginDate(LocalDateTime loginDate) {
+        this.loginDate = loginDate;
     }
 }

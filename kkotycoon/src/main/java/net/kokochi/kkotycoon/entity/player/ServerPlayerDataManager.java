@@ -37,14 +37,29 @@ public class ServerPlayerDataManager extends PersistentState {
             NbtCompound playerNbt = new NbtCompound();
             playerNbt.putByteArray("codexArray", playerData.getCodexArray());
             playerNbt.putLong("kkoCoin", playerData.getKkoCoin());
-            nbt.putLong("lastReceivedCodexRewardDate", playerData.getLastReceivedCodexRewardDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            playerNbt.putLong("lastReceivedCodexRewardDate", playerData.getLastReceivedCodexRewardDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 
             List<LocalDateTime> codexLevelUpStack = playerData.getCodexLevelUpStack();
             long[] codexLevelUpStacksArray = new long[codexLevelUpStack.size()];
             for (int i=0;i<codexLevelUpStack.size();i++){
                 codexLevelUpStacksArray[i] = codexLevelUpStack.get(i).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
             }
-            nbt.putLongArray("codexLevelUpStack", codexLevelUpStacksArray);
+            playerNbt.putLongArray("codexLevelUpStack", codexLevelUpStacksArray);
+            if (playerData.getLastPurchaseProductDate() != null) {
+                playerNbt.putLong("lastPurchaseProductDate", playerData.getLastPurchaseProductDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            }
+
+            // 누적 데이터
+            playerNbt.putDouble("accumulatedDistance", playerData.getAccumulatedDistance());
+            playerNbt.putInt("accumulatedBreakOreBlock", playerData.getAccumulatedBreakOreBlock());
+            playerNbt.putInt("accumulatedBreakCropBlock", playerData.getAccumulatedBreakCropBlock());
+            playerNbt.putInt("accumulatedBlock", playerData.getAccumulatedBlock());
+            playerNbt.putInt("accumulatedKilledMonster", playerData.getAccumulatedKilledMonster());
+            playerNbt.putInt("accumulatedKilledAnimal", playerData.getAccumulatedKilledAnimal());
+            playerNbt.putDouble("accumulatedDamaged", playerData.getAccumulatedDamaged());
+            playerNbt.putDouble("accumulatedAttack", playerData.getAccumulatedAttack());
+            playerNbt.putLong("accumulatedPlayTime", playerData.getAccumulatedPlayTime());
+            playerNbt.putInt("accumulatedOnBlock", playerData.getAccumulatedOnBlock());
 
             playersNbt.put(uuid.toString(), playerNbt);
         });
@@ -76,6 +91,22 @@ public class ServerPlayerDataManager extends PersistentState {
                 codexLevelUpList.add(Instant.ofEpochMilli(l).atZone(ZoneId.systemDefault()).toLocalDateTime());
             }
             playerData.setCodexLevelUpStack(codexLevelUpList);
+
+            if (playerNbt.contains("lastPurchaseProductDate")) {
+                playerData.setLastPurchaseProductDate(Instant.ofEpochMilli(playerNbt.getLong("lastPurchaseProductDate")).atZone(ZoneId.systemDefault()).toLocalDateTime());
+            }
+
+            // 누적 데이터
+            playerData.setAccumulatedDistance(playerNbt.getDouble("accumulatedDistance"));
+            playerData.setAccumulatedBreakOreBlock(playerNbt.getInt("accumulatedBreakOreBlock"));
+            playerData.setAccumulatedBreakCropBlock(playerNbt.getInt("accumulatedBreakCropBlock"));
+            playerData.setAccumulatedBlock(playerNbt.getInt("accumulatedBlock"));
+            playerData.setAccumulatedKilledMonster(playerNbt.getInt("accumulatedKilledMonster"));
+            playerData.setAccumulatedKilledAnimal(playerNbt.getInt("accumulatedKilledAnimal"));
+            playerData.setAccumulatedDamaged(playerNbt.getDouble("accumulatedDamaged"));
+            playerData.setAccumulatedAttack(playerNbt.getDouble("accumulatedAttack"));
+            playerData.setAccumulatedPlayTime(playerNbt.getLong("accumulatedPlayTime"));
+            playerData.setAccumulatedOnBlock(playerNbt.getInt("accumulatedOnBlock"));
 
             UUID uuid = UUID.fromString(key);
             state.playerDataMap.put(uuid, playerData);

@@ -1,14 +1,17 @@
 package net.kokochi.kkotycoon.mixin;
 
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
+import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -34,6 +37,7 @@ public class BlockMixin {
                                   ItemStack stack,
                                   CallbackInfo ci) {
         if (!world.isClient) {
+            KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
 
             // 광물 블럭 채굴 시
             if (state.isIn(TagKey.of(Registries.BLOCK.getKey(), new Identifier("minecraft", "mineable/pickaxe")))) {
@@ -54,7 +58,25 @@ public class BlockMixin {
                         }
                     }
                 }
+
+
+                playerData.setAccumulatedBreakOreBlock(playerData.getAccumulatedBreakOreBlock() + 1);
+            } else if (state.getBlock() instanceof CropBlock || state.getBlock() instanceof StemBlock || state.getBlock() instanceof AttachedStemBlock) {
+                playerData.setAccumulatedBreakCropBlock(playerData.getAccumulatedBreakCropBlock() + 1);
             }
+            playerData.setAccumulatedBlock(playerData.getAccumulatedBlock() + 1);
+        }
+    }
+    @Inject(method = "onPlaced", at = @At("TAIL"), cancellable = true)
+    private void injectOnPlaced(World world,
+                                BlockPos pos,
+                                BlockState state,
+                                @Nullable LivingEntity placer,
+                                ItemStack itemStack,
+                                CallbackInfo ci) {
+        if (!world.isClient && placer instanceof ServerPlayerEntity) {
+            KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(placer);
+            playerData.setAccumulatedOnBlock(playerData.getAccumulatedOnBlock() + 1);
         }
     }
 

@@ -13,6 +13,7 @@ public class ClientPlayerDataManager {
         playerData.setCodexArray(data.getCodexArray());
         playerData.setKkoCoin(data.getKkoCoin());
         playerData.setLastReceivedCodexRewardDate(data.getLastReceivedCodexRewardDate());
+        playerData.setLastPurchaseProductDate(data.getLastPurchaseProductDate());
     }
 
     public static void setCodexList(List<CodexInfo> newCodexList) {

@@ -10,6 +10,7 @@ import net.kokochi.kkotycoon.KkoTycoon;
 import net.kokochi.kkotycoon.entity.codex.CodexInfo;
 import net.kokochi.kkotycoon.entity.codex.CodexSet;
 import net.kokochi.kkotycoon.entity.item.KkoTycoonItems;
+import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
 import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
 import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
@@ -176,7 +177,32 @@ public class CommandHandler {
                                 nbt.putDouble(PlayerActionEventHandler.PICKAXE_EFF_WEIGHT_KEY, 0.5d);
                                 mainHandStack.setNbt(nbt);
                                 return 1;
-                            })));
+                            }))
+                    .then(CommandManager.literal("distance")
+                            .executes(context -> {
+                                ServerPlayerEntity player = context.getSource().getPlayer();
+                                KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
+
+                                player.sendMessage(Text.of("이동한 거리 : " + playerData.getAccumulatedDistance()));
+                                return 1;
+                            }))
+                    .then(CommandManager.literal("ore")
+                            .executes(context -> {
+                                ServerPlayerEntity player = context.getSource().getPlayer();
+                                KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
+
+                                player.sendMessage(Text.of("캔 광물 : " + playerData.getAccumulatedBreakOreBlock()));
+                                return 1;
+                            }))
+                    .then(CommandManager.literal("crop")
+                            .executes(context -> {
+                                ServerPlayerEntity player = context.getSource().getPlayer();
+                                KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
+
+                                player.sendMessage(Text.of("캔 농작물 : " + playerData.getAccumulatedBreakCropBlock()));
+                                return 1;
+                            }))
+            );
         });
     }
 }
