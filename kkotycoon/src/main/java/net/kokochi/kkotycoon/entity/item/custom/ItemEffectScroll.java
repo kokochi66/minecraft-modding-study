@@ -45,7 +45,7 @@ public class ItemEffectScroll extends Item {
             ItemStack toolStack = user.getOffHandStack();
             Item toolItem = toolStack.getItem();
 
-            if (toolItem instanceof PickaxeItem || toolItem instanceof HoeItem ||
+            if (toolItem instanceof PickaxeItem ||
                     toolItem instanceof SwordItem || toolItem instanceof BowItem) {
 
                 int level = getEnhancementLevel(toolItem); // 강화 레벨
@@ -110,7 +110,6 @@ public class ItemEffectScroll extends Item {
 
     private int getLevelValue(Item item, int level) {
         if (item instanceof PickaxeItem) return level == 1 ? 1 : level == 2 ? 2 : 5;
-        else if (item instanceof HoeItem) return level == 1 ? 2 : level == 2 ? 5 : 10;
         else if (item instanceof SwordItem) return level == 1 ? 100 : level == 2 ? 200 : 350;
         else if (item instanceof BowItem) return level == 1 ? 50 : level == 2 ? 100 : 200;
         return 0;

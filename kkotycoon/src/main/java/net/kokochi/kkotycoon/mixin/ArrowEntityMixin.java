@@ -37,7 +37,6 @@ public class ArrowEntityMixin {
         if (shooter instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) shooter;
             ItemStack mainHandItem = player.getMainHandStack();
-            ArrowEntity arrowEntity = (ArrowEntity) (Object) this;
 
             if (mainHandItem.hasNbt()) {
                 NbtCompound nbt = mainHandItem.getNbt();

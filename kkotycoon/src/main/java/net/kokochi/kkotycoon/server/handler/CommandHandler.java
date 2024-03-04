@@ -14,11 +14,13 @@ import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
 import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.kokochi.kkotycoon.packet.ShopScreenS2CPacket;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -27,6 +29,7 @@ import net.minecraft.util.Identifier;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CommandHandler {
@@ -34,11 +37,12 @@ public class CommandHandler {
     public static void initCommand() {
         // 데이터 초기화 명령어
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-
-
             dispatcher.register(CommandManager.literal("kkc")
                     .requires(source -> source.hasPermissionLevel(2)) // OP 권한 요구
                     .then(CommandManager.argument("playerId", StringArgumentType.string())
+                                    .suggests(((context, builder) -> {
+                                        return CommandSource.suggestMatching(context.getSource().getPlayerNames(), builder);
+                                    }))
                             // 데이터 초기화 명령어
                             .then(CommandManager.literal("reset")
                                     .executes(context -> {
