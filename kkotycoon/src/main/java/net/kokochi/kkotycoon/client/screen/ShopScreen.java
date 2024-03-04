@@ -4,6 +4,7 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.kokochi.kkotycoon.KkoTycoon;
 import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
+import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
 import net.kokochi.kkotycoon.entity.product.KkoShopProduct;
 import net.kokochi.kkotycoon.entity.product.KkoShopProductDataManager;
 import net.kokochi.kkotycoon.packet.CodexC2SPostPacket;
@@ -17,6 +18,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 public class ShopScreen extends Screen {
@@ -93,7 +97,21 @@ public class ShopScreen extends Screen {
         }
     }
 
+    public boolean isFirstPurchaseToday(KkotycoonPlayerData playerData) {
+        LocalDateTime lastPurchaseDate = playerData.getLastPurchaseProductDate();
 
+        // 마지막 구매 날짜가 null인 경우, 오늘 최초 구매로 간주
+        if (lastPurchaseDate == null) {
+            return true;
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime todayStart = LocalDateTime.of(today, LocalTime.of(5, 0)); // 오늘 새벽 5시
+
+        // 마지막 구매 날짜가 오늘 새벽 5시 이전이거나, 오늘이고 새벽 5시 이전인 경우 최초 구매로 간주
+        return lastPurchaseDate.isBefore(todayStart) ||
+                (lastPurchaseDate.toLocalDate().isEqual(today) && lastPurchaseDate.toLocalTime().isBefore(LocalTime.of(5, 0)));
+    }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
@@ -101,6 +119,13 @@ public class ShopScreen extends Screen {
         super.render(context, mouseX, mouseY, delta);
 
         // 품목 총 4개
+        KkotycoonPlayerData playerData = ClientPlayerDataManager.playerData;
+        // 오늘 최초구매 사용 여부
+        // playerData.getLastPurchaseProductDate() == null; 이거나, playerData.getLastPurchaseProductDate가 오늘 동일 날짜 새벽 5시 이전이라면 최초구매임
+        //
+        boolean isTodayFirstPurchase = playerData.getLastPurchaseProductDate() == null
+                || playerData.getLastPurchaseProductDate().isBefore(LocalDateTime.of(LocalDate.now(), LocalTime.of(5, 0)));
+
         List<KkoShopProduct> productList = KkoShopProductDataManager.PRODUCT_LIST;
         for (int i = 0; i < productList.size(); i ++) {
             KkoShopProduct kkoShopProduct = productList.get(i);
@@ -124,8 +149,14 @@ public class ShopScreen extends Screen {
                     boxPosX + itemOutSidePos + itemOutSideHeight + itemOutSideMargin, boxPosY + itemOutSidePos, 0xFFFFFF, true);
 
             // 가격 텍스트
-            context.drawText(textRenderer, Text.of("가격 :§6" + NumberFormat.getInstance().format(kkoShopProduct.getPrice()) + "kc"),
-                    boxPosX + itemOutSidePos + itemOutSideHeight + itemOutSideMargin, boxPosY + itemOutSidePos + 12, 0xFFFFFF, true);
+            if (isTodayFirstPurchase) {
+                context.drawText(textRenderer, Text.of("1일 1회 무료구매(하나만)"),
+                        boxPosX + itemOutSidePos + itemOutSideHeight + itemOutSideMargin, boxPosY + itemOutSidePos + 12, 0xFFFFFF, true);
+            } else {
+                context.drawText(textRenderer, Text.of("가격 :§6" + NumberFormat.getInstance().format(kkoShopProduct.getPrice()) + "kc"),
+                        boxPosX + itemOutSidePos + itemOutSideHeight + itemOutSideMargin, boxPosY + itemOutSidePos + 12, 0xFFFFFF, true);
+            }
+
         }
     }
 

@@ -149,6 +149,7 @@ public class ServerRequestHandler {
                     }
 
                     playerData.setKkoCoin(playerData.getKkoCoin() - kkoShopProduct.getPrice());
+                    playerData.setLastPurchaseProductDate(LocalDateTime.now());
                     ItemStack purchaseItemStack = new ItemStack(kkoShopProduct.getItem());
                     purchaseItemStack.setCount(1);
                     player.getInventory().insertStack(purchaseItemStack);

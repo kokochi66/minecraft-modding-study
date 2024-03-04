@@ -44,6 +44,11 @@ public class KkotycoonMainDataS2CGetPacket {
             buf.writeLong(localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         }
 
+        buf.writeBoolean(packet.playerData.getLastPurchaseProductDate() != null);
+        if (packet.playerData.getLastPurchaseProductDate() != null) {
+            buf.writeLong(packet.playerData.getLastPurchaseProductDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        }
+
         buf.writeInt(packet.codexList.size());
         for (int i=0;i<packet.codexList.size();i++) {
             CodexInfo codexInfo = packet.codexList.get(i);
@@ -62,6 +67,11 @@ public class KkotycoonMainDataS2CGetPacket {
         List<LocalDateTime> codexLevelUpStack = data.getCodexLevelUpStack();
         for (int i = 0; i < stackSize; i++) {
             codexLevelUpStack.add(Instant.ofEpochMilli(buf.readLong()).atZone(ZoneId.systemDefault()).toLocalDateTime());
+        }
+
+        boolean lastPurchaseProductDateIsExists = buf.readBoolean();
+        if (lastPurchaseProductDateIsExists) {
+            data.setLastPurchaseProductDate(Instant.ofEpochMilli(buf.readLong()).atZone(ZoneId.systemDefault()).toLocalDateTime());
         }
 
         int codexSize = buf.readInt();

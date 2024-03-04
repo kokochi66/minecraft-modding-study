@@ -11,6 +11,7 @@ public class KkotycoonPlayerData {
     private long kkoCoin;
     private LocalDateTime lastReceivedCodexRewardDate;
     private List<LocalDateTime> codexLevelUpStack;
+    private LocalDateTime lastPurchaseProductDate;
 
     public KkotycoonPlayerData() {
         this.codexArray = new byte[350];
@@ -89,5 +90,13 @@ public class KkotycoonPlayerData {
 
     public void setCodexLevelUpStack(List<LocalDateTime> codexLevelUpStack) {
         this.codexLevelUpStack = codexLevelUpStack;
+    }
+
+    public LocalDateTime getLastPurchaseProductDate() {
+        return lastPurchaseProductDate;
+    }
+
+    public void setLastPurchaseProductDate(LocalDateTime lastPurchaseProductDate) {
+        this.lastPurchaseProductDate = lastPurchaseProductDate;
     }
 }
