@@ -118,10 +118,6 @@ public class ShopScreen extends Screen {
         renderBackground(context);
         super.render(context, mouseX, mouseY, delta);
 
-        // 품목 총 4개
-        KkotycoonPlayerData playerData = ClientPlayerDataManager.playerData;
-
-
         List<KkoShopProduct> productList = KkoShopProductDataManager.PRODUCT_LIST;
         for (int i = 0; i < productList.size(); i ++) {
             KkoShopProduct kkoShopProduct = productList.get(i);

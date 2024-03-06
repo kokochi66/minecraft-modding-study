@@ -37,14 +37,21 @@ public class ServerPlayerDataManager extends PersistentState {
             NbtCompound playerNbt = new NbtCompound();
             playerNbt.putByteArray("codexArray", playerData.getCodexArray());
             playerNbt.putLong("kkoCoin", playerData.getKkoCoin());
-            playerNbt.putLong("lastReceivedCodexRewardDate", playerData.getLastReceivedCodexRewardDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            if (playerData.getLastReceivedCodexRewardDate() != null) {
+                playerNbt.putLong("lastReceivedCodexRewardDate", playerData.getLastReceivedCodexRewardDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            }
+            playerNbt.putString("playerName", playerData.getPlayerName());
 
             List<LocalDateTime> codexLevelUpStack = playerData.getCodexLevelUpStack();
-            long[] codexLevelUpStacksArray = new long[codexLevelUpStack.size()];
-            for (int i=0;i<codexLevelUpStack.size();i++){
-                codexLevelUpStacksArray[i] = codexLevelUpStack.get(i).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            if (codexLevelUpStack != null) {
+                long[] codexLevelUpStacksArray = new long[codexLevelUpStack.size()];
+                for (int i=0;i<codexLevelUpStack.size();i++){
+                    codexLevelUpStacksArray[i] = codexLevelUpStack.get(i).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                }
+                playerNbt.putLongArray("codexLevelUpStack", codexLevelUpStacksArray);
             }
-            playerNbt.putLongArray("codexLevelUpStack", codexLevelUpStacksArray);
+
+
             if (playerData.getLastPurchaseProductDate() != null) {
                 playerNbt.putLong("lastPurchaseProductDate", playerData.getLastPurchaseProductDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
             }
@@ -60,6 +67,7 @@ public class ServerPlayerDataManager extends PersistentState {
             playerNbt.putDouble("accumulatedAttack", playerData.getAccumulatedAttack());
             playerNbt.putLong("accumulatedPlayTime", playerData.getAccumulatedPlayTime());
             playerNbt.putInt("accumulatedOnBlock", playerData.getAccumulatedOnBlock());
+            playerNbt.putInt("accumulatedDeathCount", playerData.getAccumulatedDeathCount());
 
             playersNbt.put(uuid.toString(), playerNbt);
         });
@@ -84,6 +92,7 @@ public class ServerPlayerDataManager extends PersistentState {
             playerData.setCodexArray(playerNbt.getByteArray("codexArray"));
             playerData.setKkoCoin(playerNbt.getLong("kkoCoin"));
             playerData.setLastReceivedCodexRewardDate(Instant.ofEpochMilli(playerNbt.getLong("lastReceivedCodexRewardDate")).atZone(ZoneId.systemDefault()).toLocalDateTime());
+            playerData.setPlayerName(playerNbt.getString("playerName"));
 
             long[] codexLevelUpStacksArray = playerNbt.getLongArray("codexLevelUpStack");
             List<LocalDateTime> codexLevelUpList = new ArrayList<>();
@@ -107,6 +116,7 @@ public class ServerPlayerDataManager extends PersistentState {
             playerData.setAccumulatedAttack(playerNbt.getDouble("accumulatedAttack"));
             playerData.setAccumulatedPlayTime(playerNbt.getLong("accumulatedPlayTime"));
             playerData.setAccumulatedOnBlock(playerNbt.getInt("accumulatedOnBlock"));
+            playerData.setAccumulatedDeathCount(playerNbt.getInt("accumulatedDeathCount"));
 
             UUID uuid = UUID.fromString(key);
             state.playerDataMap.put(uuid, playerData);
@@ -147,7 +157,7 @@ public class ServerPlayerDataManager extends PersistentState {
 
     public static KkotycoonPlayerData getPlayerData(LivingEntity player) {
         ServerPlayerDataManager serverState = getServerState(player.getWorld().getServer());
-        return serverState.playerDataMap.computeIfAbsent(player.getUuid(), uuid -> new KkotycoonPlayerData());
+        return serverState.playerDataMap.computeIfAbsent(player.getUuid(), uuid -> new KkotycoonPlayerData(player.getName().getString()));
     }
 
     public static List<CodexInfo> getCodexList(MinecraftServer server) {
@@ -158,7 +168,7 @@ public class ServerPlayerDataManager extends PersistentState {
     public static KkotycoonPlayerData resetPlayerData(LivingEntity player) {
         ServerPlayerDataManager serverState = getServerState(player.getWorld().getServer());
         // 데이터를 기본으로 초기화
-        KkotycoonPlayerData kkotycoonPlayerData = new KkotycoonPlayerData();
+        KkotycoonPlayerData kkotycoonPlayerData = new KkotycoonPlayerData(player.getName().getString());
         serverState.playerDataMap.put(player.getUuid(), kkotycoonPlayerData);
         return kkotycoonPlayerData;
     }

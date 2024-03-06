@@ -6,6 +6,7 @@ import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageSources;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -39,6 +40,15 @@ public abstract class ServerPlayerEntityMixin {
         if (!player.getWorld().isClient) {
             KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
             playerData.setLoginDate(LocalDateTime.now());
+        }
+    }
+
+    @Inject(method = "onDeath", at = @At("TAIL"), cancellable = true)
+    private void injectOnDeath(DamageSource damageSource, CallbackInfo ci) {
+        ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
+        if (!player.getWorld().isClient) {
+            KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
+            playerData.setAccumulatedDeathCount(playerData.getAccumulatedDeathCount() + 1);
         }
     }
 

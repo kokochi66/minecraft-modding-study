@@ -1,6 +1,8 @@
 package net.kokochi.kkotycoon.entity.player;
 
 
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 
 import java.time.LocalDateTime;
@@ -14,6 +16,7 @@ public class KkotycoonPlayerData {
     private LocalDateTime lastReceivedCodexRewardDate;
     private List<LocalDateTime> codexLevelUpStack;
     private LocalDateTime lastPurchaseProductDate;
+    private String playerName;
 
 
     // 누적 데이터
@@ -29,9 +32,19 @@ public class KkotycoonPlayerData {
     private long accumulatedPlayTime;       // 누적 플레이 타임
     private LocalDateTime loginDate;        // 접속시간
     private int accumulatedOnBlock;         // 누적 설치 블록 개수
+    private int accumulatedDeathCount;      // 사망 회수
 
 
     public KkotycoonPlayerData() {
+        this.codexArray = new byte[350];
+        this.kkoCoin = 0L;
+        this.lastReceivedCodexRewardDate = LocalDateTime.now();
+        this.codexLevelUpStack = new ArrayList<>();
+        this.accumulatedDistance = 0.0d;
+    }
+
+    public KkotycoonPlayerData(String playerName) {
+        this.playerName = playerName;
         this.codexArray = new byte[350];
         this.kkoCoin = 0L;
         this.lastReceivedCodexRewardDate = LocalDateTime.now();
@@ -213,5 +226,21 @@ public class KkotycoonPlayerData {
 
     public void setLoginDate(LocalDateTime loginDate) {
         this.loginDate = loginDate;
+    }
+
+    public int getAccumulatedDeathCount() {
+        return accumulatedDeathCount;
+    }
+
+    public void setAccumulatedDeathCount(int accumulatedDeathCount) {
+        this.accumulatedDeathCount = accumulatedDeathCount;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
     }
 }
