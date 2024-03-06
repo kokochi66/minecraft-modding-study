@@ -27,7 +27,8 @@ public abstract class ServerPlayerEntityMixin {
         ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
         if (!player.getWorld().isClient) {
             KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
-            long between = ChronoUnit.SECONDS.between(playerData.getLoginDate() == null ? LocalDateTime.now() : playerData.getLoginDate(), LocalDateTime.now());
+            long between = ChronoUnit.SECONDS.between(
+                    playerData.getLoginDate() == null ? LocalDateTime.now() : playerData.getLoginDate(), LocalDateTime.now());
             playerData.setAccumulatedPlayTime(playerData.getAccumulatedPlayTime() + between);
         }
     }

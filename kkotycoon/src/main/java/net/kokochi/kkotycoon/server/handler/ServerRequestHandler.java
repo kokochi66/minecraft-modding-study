@@ -138,10 +138,8 @@ public class ServerRequestHandler {
                     }
 
                     KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
-                    boolean isTodayFirstPurchase = playerData.getLastPurchaseProductDate() == null
-                            || playerData.getLastPurchaseProductDate().isBefore(LocalDateTime.of(LocalDate.now(), LocalTime.of(5, 0)));
                     // 금액보다 보유 코인이 부족한 경우 구매가 불가능합니다.
-                    if (!isTodayFirstPurchase && kkoShopProduct.getPrice() > playerData.getKkoCoin()) {
+                    if (kkoShopProduct.getPrice() > playerData.getKkoCoin()) {
                         player.sendMessage(Text.of("꼬코인이 부족합니다."));
                         return;
                     }
@@ -152,10 +150,7 @@ public class ServerRequestHandler {
                         return;
                     }
 
-                    if (!isTodayFirstPurchase) {
-                        playerData.setKkoCoin(playerData.getKkoCoin() - kkoShopProduct.getPrice());
-                    }
-
+                    playerData.setKkoCoin(playerData.getKkoCoin() - kkoShopProduct.getPrice());
                     playerData.setLastPurchaseProductDate(LocalDateTime.now());
                     ItemStack purchaseItemStack = new ItemStack(kkoShopProduct.getItem());
                     purchaseItemStack.setCount(1);

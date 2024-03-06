@@ -120,11 +120,7 @@ public class ShopScreen extends Screen {
 
         // 품목 총 4개
         KkotycoonPlayerData playerData = ClientPlayerDataManager.playerData;
-        // 오늘 최초구매 사용 여부
-        // playerData.getLastPurchaseProductDate() == null; 이거나, playerData.getLastPurchaseProductDate가 오늘 동일 날짜 새벽 5시 이전이라면 최초구매임
-        //
-        boolean isTodayFirstPurchase = playerData.getLastPurchaseProductDate() == null
-                || playerData.getLastPurchaseProductDate().isBefore(LocalDateTime.of(LocalDate.now(), LocalTime.of(5, 0)));
+
 
         List<KkoShopProduct> productList = KkoShopProductDataManager.PRODUCT_LIST;
         for (int i = 0; i < productList.size(); i ++) {
@@ -149,13 +145,8 @@ public class ShopScreen extends Screen {
                     boxPosX + itemOutSidePos + itemOutSideHeight + itemOutSideMargin, boxPosY + itemOutSidePos, 0xFFFFFF, true);
 
             // 가격 텍스트
-            if (isTodayFirstPurchase) {
-                context.drawText(textRenderer, Text.of("1일 1회 무료(4개 중 하나만)"),
-                        boxPosX + itemOutSidePos + itemOutSideHeight + itemOutSideMargin, boxPosY + itemOutSidePos + 12, 0xFFFFFF, true);
-            } else {
-                context.drawText(textRenderer, Text.of("가격 :§6" + NumberFormat.getInstance().format(kkoShopProduct.getPrice()) + "kc"),
-                        boxPosX + itemOutSidePos + itemOutSideHeight + itemOutSideMargin, boxPosY + itemOutSidePos + 12, 0xFFFFFF, true);
-            }
+            context.drawText(textRenderer, Text.of("가격 :§6" + NumberFormat.getInstance().format(kkoShopProduct.getPrice()) + "kc"),
+                    boxPosX + itemOutSidePos + itemOutSideHeight + itemOutSideMargin, boxPosY + itemOutSidePos + 12, 0xFFFFFF, true);
 
         }
     }
