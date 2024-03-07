@@ -127,6 +127,26 @@ public class CommandHandler {
                                 ServerPlayNetworking.send(player, responsePacketId, responseBuf);
                                 return 1;
                             }))
+                    // 도감에 개수 정보를 수정합니다.
+                    .then(CommandManager.literal("editCodex")
+                            .then(CommandManager.argument("codexIndex", IntegerArgumentType.integer())
+                                    .then(CommandManager.argument("count", IntegerArgumentType.integer())
+                                            .executes(context -> {
+                                                int codexIndex = IntegerArgumentType.getInteger(context, "codexIndex");
+                                                int count = IntegerArgumentType.getInteger(context, "count");
+                                                ServerPlayerEntity player = context.getSource().getPlayer();
+
+                                                List<CodexInfo> codexInfos = ServerPlayerDataManager.codexInfoList;
+                                                CodexInfo codexInfo = codexInfos.get(codexIndex);
+                                                codexInfo.setCount(count);
+
+                                                // 클라이언트에 응답 데이터를 내려줍니다.
+                                                PacketByteBuf responseBuf = new PacketByteBuf(Unpooled.buffer());
+                                                KkotycoonMainDataS2CGetPacket.encode(new KkotycoonMainDataS2CGetPacket(ServerPlayerDataManager.getPlayerData(player)), responseBuf);
+                                                Identifier responsePacketId = new Identifier(KkoTycoon.MOD_ID, KkotycoonMainDataS2CGetPacket.CODEX_GET_PACKET_RESPONSE_ID);
+                                                ServerPlayNetworking.send(player, responsePacketId, responseBuf);
+                                                return 1;
+                                            }))))
             );
 
             // 출금 명령어
