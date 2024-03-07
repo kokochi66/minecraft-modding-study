@@ -188,6 +188,7 @@ public class CommandHandler {
 
             // 데이터 관련 명령어
             dispatcher.register(CommandManager.literal("kkcdata")
+                    .requires(source -> source.hasPermissionLevel(2)) // OP 권한 요구
                     .then(CommandManager.literal("ranking")
                             .then(CommandManager.literal("dist")
                                     .executes(context -> {
