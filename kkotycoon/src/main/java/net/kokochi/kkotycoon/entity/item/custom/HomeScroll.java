@@ -42,6 +42,11 @@ public class HomeScroll extends Item {
             ServerWorld overworld = serverPlayer.getServer().getWorld(World.OVERWORLD);
             BlockPos spawnPoint = serverPlayer.getSpawnPointPosition();
 
+            // 캐릭터 스폰포인트가 없다면 기본 스폰장소로 이동
+            if (spawnPoint == null) {
+                spawnPoint = world.getSpawnPos();
+            }
+
             // 플레이어를 오버월드의 스폰 지점으로 순간 이동시킵니다.
             serverPlayer.teleport(
                     overworld,

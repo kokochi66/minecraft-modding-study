@@ -55,7 +55,7 @@ public class ArrowEntityMixin {
 
                     if (Math.random() < chance) {
                         float additionalDamage = (float) (baseDamage * powerDamage * (0.01d * (double)level));
-                        player.sendMessage(Text.of("추가 데미지 적용 = " + additionalDamage));
+//                        player.sendMessage(Text.of("추가 데미지 적용 = " + additionalDamage));
                         DamageSource damageSource = player.getDamageSources().playerAttack(player);
                         target.damage(damageSource, additionalDamage);
                     }

@@ -180,7 +180,7 @@ public enum CodexSet {
     CARROT_ON_A_STICK(Items.CARROT_ON_A_STICK, 10),     // 당근 낚시대
 
     WARPED_FUNGUS_ON_A_STICK(Items.WARPED_FUNGUS_ON_A_STICK, 10),           // 뒤틀린 균 낚시대
-    ELYTRA(Items.ELYTRA, 10),               // 겉날개
+    ELYTRA(Items.ELYTRA, 1),               // 겉날개
     MUSHROOM_STEW(Items.MUSHROOM_STEW, 10),     // 버섯 스튜
     STRING(Items.STRING, 10),           // 실
     FEATHER(Items.FEATHER, 10),         // 깃털
@@ -289,7 +289,7 @@ public enum CodexSet {
     GRINDSTONE(Items.GRINDSTONE, 10),       // 숫돌
     SMITHING_TABLE(Items.SMITHING_TABLE, 10),       // 대장장이 작업대
     STONECUTTER(Items.STONECUTTER, 10),     // 석재 절단기
-    BELL(Items.BELL, 10),       // 종
+    BELL(Items.BELL, 1),       // 종
     LANTERN(Items.LANTERN, 10),     // 랜턴
     SOUL_LANTERN(Items.SOUL_LANTERN, 10),       // 영혼 랜턴
     SWEET_BERRIES(Items.SWEET_BERRIES, 10),         // 달콤한 열매

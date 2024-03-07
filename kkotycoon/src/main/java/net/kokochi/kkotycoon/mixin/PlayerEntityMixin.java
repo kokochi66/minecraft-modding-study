@@ -66,7 +66,7 @@ public class PlayerEntityMixin {
                         }
 
                         if (Math.random() < chance) {
-                            player.sendMessage(Text.of("추가 데미지 적용"));
+//                            player.sendMessage(Text.of("추가 데미지 적용"));
                             float additionalDamage = (float) (attackDamage * (0.01d * (double)level));
                             DamageSource damageSource = player.getDamageSources().playerAttack(player);
                             livingEntity.damage(damageSource, additionalDamage);
