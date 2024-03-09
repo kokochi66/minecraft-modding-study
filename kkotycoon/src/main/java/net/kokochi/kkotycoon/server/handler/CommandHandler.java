@@ -16,10 +16,15 @@ import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.kokochi.kkotycoon.packet.ShopScreenS2CPacket;
 import net.minecraft.command.CommandSource;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
@@ -189,6 +194,36 @@ public class CommandHandler {
             // 데이터 관련 명령어
             dispatcher.register(CommandManager.literal("kkcdata")
                     .requires(source -> source.hasPermissionLevel(2)) // OP 권한 요구
+                    .then(CommandManager.literal("convertEnchant")
+                            .executes(context -> {
+                                ServerPlayerEntity player = context.getSource().getPlayer();
+                                PlayerInventory inventory = player.getInventory();
+
+                                for (int i = 0; i < PlayerInventory.MAIN_SIZE; i++) {
+                                    ItemStack stack = inventory.getStack(i);
+                                    if (stack.hasNbt()) {
+                                        NbtCompound nbt = stack.getNbt();
+                                        if (nbt.contains("Enchantments", 9)) { // 9는 NBT 태그 리스트 타입
+                                            NbtList enchantmentsList = nbt.getList("Enchantments", 10); // 10는 NBT 태그 컴파운드 타입
+                                            ItemStack enchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
+                                            NbtCompound bookNbt = new NbtCompound();
+                                            bookNbt.put("StoredEnchantments", enchantmentsList);
+                                            enchantedBook.setNbt(bookNbt);
+
+                                            player.dropItem(enchantedBook, false);
+                                        }
+                                    }
+                                }
+                                return 1;
+                            }))
+                    .then(CommandManager.literal("setName")
+                            .then(CommandManager.argument("name", StringArgumentType.string())
+                            .executes(context -> {
+                                ServerPlayerEntity player = context.getSource().getPlayer();
+                                String name = StringArgumentType.getString(context, "name");
+                                player.setCustomName(Text.of(name));
+                                return 1;
+                            })))
                     .then(CommandManager.literal("ranking")
                             .then(CommandManager.literal("dist")
                                     .executes(context -> {

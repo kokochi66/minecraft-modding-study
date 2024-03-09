@@ -1,5 +1,6 @@
 package net.kokochi.kkotycoon.entity.item.custom;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -63,10 +64,12 @@ public class ItemEffectScroll extends Item {
 
                 // 최고 수준 등급 아이템을 획득했으면 전 서버에 확성기
                 if (getLevelValue(toolItem, 3) <= level && weight >= 0.4d){
-                    for (ServerPlayerEntity player : ((ServerWorld) world).getPlayers()) {
-                        player.sendMessage(Text.literal("§6" + user.getName().getString() + "§f 님께서 '§a" +
-                                toolItem.getName().getString() + "§f:" + getMessage(toolItem, level, (int) (weight * 100)) + "' §f를 획득하셨습니다!"));
-                        player.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1.0F, 1.0F);
+                    for (ServerWorld serverWorld : world.getServer().getWorlds()) {
+                        for (PlayerEntity player : serverWorld.getPlayers()) {
+                            player.sendMessage(Text.literal("§6" + user.getName().getString() + "§f 님께서 '§a" +
+                                    toolItem.getName().getString() + "§f:" + getMessage(toolItem, level, (int) (weight * 100)) + "' §f를 획득하셨습니다!"));
+                            player.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1.0F, 1.0F);
+                        }
                     }
                 } else {
                     // 아니면 해당 유저에게만 표기

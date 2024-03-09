@@ -3,11 +3,13 @@ package net.kokochi.kkotycoon.entity.item.custom;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -18,9 +20,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 import static net.minecraft.enchantment.Enchantments.*;
 
@@ -46,19 +46,28 @@ public class RandomEnchantTicket extends Item {
                 user.sendMessage(Text.of("인벤토리 창이 꽉 차있습니다."));
                 return TypedActionResult.fail(ticketStack);
             }
+            ItemStack offHandStack = user.getOffHandStack();
+
             // 인챈트북을 생성하고 랜덤 인챈트를 적용한다.
-            ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
             Enchantment enchantment = pickRandomEnchantment();
             int level = enchantment.getMaxLevel();
-            book.addEnchantment(enchantment, level);
+
+            Map<Enchantment, Integer> enchantmentIntegerMap = new HashMap<>();
+            enchantmentIntegerMap.put(enchantment, level);
+
+            ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
+            EnchantmentHelper.set(enchantmentIntegerMap, book);
+//            book.addEnchantment(enchantment, level);
 
             String tier = "";
             if (SS_TIER.stream().anyMatch(e -> e == enchantment)) {
                 tier = "§cSS";
 
-                for (ServerPlayerEntity player : ((ServerWorld) world).getPlayers()) {
-                    player.sendMessage(Text.of("§6" + user.getName().getString() + "§f 님께서 "  + tier + "§f 티어의 \"§9" + enchantment.getName(level).getString() + "§f\" 를 획득하셨습니다!"));
-                    player.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1.0F, 1.0F);
+                for (ServerWorld serverWorld : world.getServer().getWorlds()) {
+                    for (ServerPlayerEntity player : serverWorld.getPlayers()) {
+                        player.sendMessage(Text.of("§6" + user.getName().getString() + "§f 님께서 "  + tier + "§f 티어의 \"§9" + enchantment.getName(level).getString() + "§f\" 를 획득하셨습니다!"));
+                        player.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1.0F, 1.0F);
+                    }
                 }
             } else {
                 if (S_TIER.stream().anyMatch(e -> e == enchantment)) {

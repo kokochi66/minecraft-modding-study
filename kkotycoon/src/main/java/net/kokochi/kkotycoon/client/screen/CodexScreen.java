@@ -34,7 +34,7 @@ public class CodexScreen extends Screen {
     private Rectangle[] arrowPositions;
     private ButtonWidget rewardButtonWidget;
 
-    private final int MAX_PAGE = 2;
+    private final int MAX_PAGE = 3;
     private int currentPage = 0;
     public CodexScreen(Text title) {
         super(title);
@@ -108,9 +108,9 @@ public class CodexScreen extends Screen {
 
         if (this.currentPage < 0) {
             this.currentPage = 0;
-        } else if (this.currentPage >= MAX_PAGE) { {
-            this.currentPage = MAX_PAGE;
-        }}
+        } else if (this.currentPage >= MAX_PAGE) {
+            this.currentPage = MAX_PAGE - 1;
+        }
 
     }
 

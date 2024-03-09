@@ -1,13 +1,18 @@
 package net.kokochi.kkotycoon.entity.player;
 
+import net.fabricmc.fabric.api.util.NbtType;
 import net.kokochi.kkotycoon.KkoTycoon;
 import net.kokochi.kkotycoon.entity.codex.CodexInfo;
 import net.kokochi.kkotycoon.entity.codex.CodexSet;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Pair;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
@@ -69,6 +74,27 @@ public class ServerPlayerDataManager extends PersistentState {
             playerNbt.putInt("accumulatedOnBlock", playerData.getAccumulatedOnBlock());
             playerNbt.putInt("accumulatedDeathCount", playerData.getAccumulatedDeathCount());
 
+            // 인벤토리 세이브시 아이템 부활을 위한 데이터 저장
+            List<ItemStack> itemStacks = playerData.getItemStacks();
+            if (itemStacks != null) {
+                NbtList itemStacksNbtList = new NbtList();
+                for (ItemStack stack : itemStacks) {
+                    NbtCompound itemNbt = new NbtCompound();
+                    stack.writeNbt(itemNbt); // ItemStack을 NbtCompound로 변환
+                    itemStacksNbtList.add(itemNbt);
+                }
+                playerNbt.put("itemStacks", itemStacksNbtList); // 변환된 NbtList를 playerNbt에 저장
+            }
+
+            // 레벨 정보 저장
+            Pair<Integer, Float> levelInfo = playerData.getLevelInfo();
+            if (levelInfo != null) {
+                int level = levelInfo.getLeft(); // 레벨 정보 가져오기
+                float experience = levelInfo.getRight(); // 경험치 정보 가져오기
+                playerNbt.putInt("playerLevel", level); // 레벨 정보 저장
+                playerNbt.putFloat("playerExperience", experience); // 경험치 정보 저장
+            }
+
             playersNbt.put(uuid.toString(), playerNbt);
         });
         nbt.put("players", playersNbt);
@@ -117,6 +143,25 @@ public class ServerPlayerDataManager extends PersistentState {
             playerData.setAccumulatedPlayTime(playerNbt.getLong("accumulatedPlayTime"));
             playerData.setAccumulatedOnBlock(playerNbt.getInt("accumulatedOnBlock"));
             playerData.setAccumulatedDeathCount(playerNbt.getInt("accumulatedDeathCount"));
+
+            // 아이템 스택 리스트 복원
+            if (playerNbt.contains("itemStacks")) { // "itemStacks" 키가 존재하는지 확인
+                NbtList itemStacksNbtList = playerNbt.getList("itemStacks", NbtElement.COMPOUND_TYPE);
+                List<ItemStack> itemStacks = new ArrayList<>();
+                for (NbtElement itemNbtElement : itemStacksNbtList) {
+                    NbtCompound itemNbt = (NbtCompound) itemNbtElement;
+                    ItemStack stack = ItemStack.fromNbt(itemNbt); // NbtCompound를 ItemStack으로 변환
+                    itemStacks.add(stack);
+                }
+                playerData.setItemStacks(itemStacks); // 복원된 아이템 스택 리스트를 playerData에 설정
+            }
+
+            // 레벨 정보 복원
+            if (playerNbt.contains("playerLevel") && playerNbt.contains("playerExperience")) {
+                int level = playerNbt.getInt("playerLevel");
+                float experience = playerNbt.getFloat("playerExperience");
+                playerData.setLevelInfo(new Pair(level, experience)); // 복원된 레벨 정보를 playerData에 설정
+            }
 
             UUID uuid = UUID.fromString(key);
             state.playerDataMap.put(uuid, playerData);

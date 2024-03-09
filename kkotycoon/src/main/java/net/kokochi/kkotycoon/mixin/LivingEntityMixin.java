@@ -13,6 +13,7 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
@@ -38,11 +39,14 @@ import static net.kokochi.kkotycoon.server.handler.PlayerActionEventHandler.PICK
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
+    @Shadow protected abstract void playBlockFallSound();
+
     @Inject(method = "onDeath", at = @At("TAIL"), cancellable = true)
     private void injectOnDeath(DamageSource damageSource,
                                   CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        if (!livingEntity.getWorld().isClient) {
+        if (livingEntity.isPlayer()
+                && !livingEntity.getWorld().isClient) {
             Entity attacker = damageSource.getAttacker();
             if (attacker instanceof ServerPlayerEntity) {
                 ServerPlayerEntity player = (ServerPlayerEntity) attacker;
@@ -59,7 +63,8 @@ public abstract class LivingEntityMixin {
     @Inject(method = "damage", at = @At("TAIL"), cancellable = true)
     private void injectOnDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        if (!livingEntity.getWorld().isClient) {
+        if (livingEntity.isPlayer()
+                && !livingEntity.getWorld().isClient) {
             if ((Object)this instanceof ServerPlayerEntity) {
                 PlayerEntity player = (ServerPlayerEntity)(Object)this;
                 KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
@@ -71,6 +76,18 @@ public abstract class LivingEntityMixin {
                     KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
                     playerData.setAccumulatedAttack(playerData.getAccumulatedAttack() + amount);
                 }
+            }
+        }
+    }
+
+    @Inject(method = "drop", at = @At("HEAD"), cancellable = true)
+    private void injectOnDropHEAD(DamageSource source, CallbackInfo ci) {
+        LivingEntity livingEntity = (LivingEntity) (Object) this;
+        if (livingEntity.isPlayer()
+                && !livingEntity.getWorld().isClient) {
+            KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(livingEntity);
+            if (playerData.getItemStacks() != null) {
+                ci.cancel();
             }
         }
     }

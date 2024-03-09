@@ -3,6 +3,8 @@ package net.kokochi.kkotycoon.entity.player;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.Vec3d;
 
 import java.time.LocalDateTime;
@@ -33,6 +35,11 @@ public class KkotycoonPlayerData {
     private LocalDateTime loginDate;        // 접속시간
     private int accumulatedOnBlock;         // 누적 설치 블록 개수
     private int accumulatedDeathCount;      // 사망 회수
+
+
+    // 사망 시 아이템 복구를 위한 데이터 저장
+    private List<ItemStack> itemStacks;
+    private Pair<Integer, Float> levelInfo;
 
 
     public KkotycoonPlayerData() {
@@ -242,5 +249,21 @@ public class KkotycoonPlayerData {
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
+    }
+
+    public List<ItemStack> getItemStacks() {
+        return itemStacks;
+    }
+
+    public void setItemStacks(List<ItemStack> itemStacks) {
+        this.itemStacks = itemStacks;
+    }
+
+    public Pair<Integer, Float> getLevelInfo() {
+        return levelInfo;
+    }
+
+    public void setLevelInfo(Pair<Integer, Float> levelInfo) {
+        this.levelInfo = levelInfo;
     }
 }
