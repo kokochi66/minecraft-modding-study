@@ -41,6 +41,9 @@ public class KkotycoonPlayerData {
     private List<ItemStack> itemStacks;
     private Pair<Integer, Float> levelInfo;
 
+    // 복구 실패했을 때를 대비하여 사용자 복구 데이터를 다 저장해줍니다.
+    private List<PlayerDeathInvenHistory> deathInvenHistories;
+
 
     public KkotycoonPlayerData() {
         this.codexArray = new byte[350];
@@ -48,6 +51,7 @@ public class KkotycoonPlayerData {
         this.lastReceivedCodexRewardDate = LocalDateTime.now();
         this.codexLevelUpStack = new ArrayList<>();
         this.accumulatedDistance = 0.0d;
+        this.deathInvenHistories = new ArrayList<>();
     }
 
     public KkotycoonPlayerData(String playerName) {
@@ -57,6 +61,7 @@ public class KkotycoonPlayerData {
         this.lastReceivedCodexRewardDate = LocalDateTime.now();
         this.codexLevelUpStack = new ArrayList<>();
         this.accumulatedDistance = 0.0d;
+        this.deathInvenHistories = new ArrayList<>();
     }
 
 
@@ -265,5 +270,13 @@ public class KkotycoonPlayerData {
 
     public void setLevelInfo(Pair<Integer, Float> levelInfo) {
         this.levelInfo = levelInfo;
+    }
+
+    public List<PlayerDeathInvenHistory> getDeathInvenHistories() {
+        return deathInvenHistories;
+    }
+
+    public void setDeathInvenHistories(List<PlayerDeathInvenHistory> deathInvenHistories) {
+        this.deathInvenHistories = deathInvenHistories;
     }
 }

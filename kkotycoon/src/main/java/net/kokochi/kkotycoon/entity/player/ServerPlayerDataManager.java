@@ -95,6 +95,30 @@ public class ServerPlayerDataManager extends PersistentState {
                 playerNbt.putFloat("playerExperience", experience); // 경험치 정보 저장
             }
 
+            NbtList deathInvenHistoriesNbtList = new NbtList();
+            for (PlayerDeathInvenHistory history : playerData.getDeathInvenHistories()) {
+                NbtCompound historyNbt = new NbtCompound();
+
+                // 아이템 스택 저장
+                NbtList itemStacksNbtList = new NbtList();
+                for (ItemStack stack : history.getItemStacks()) {
+                    NbtCompound itemNbt = new NbtCompound();
+                    stack.writeNbt(itemNbt);
+                    itemStacksNbtList.add(itemNbt);
+                }
+                historyNbt.put("itemStacks", itemStacksNbtList);
+
+                // 레벨 정보 저장
+                historyNbt.putInt("level", history.getLevelInfo().getLeft());
+                historyNbt.putFloat("experience", history.getLevelInfo().getRight());
+
+                // 사망 날짜 저장
+                historyNbt.putLong("deathDate", history.getDeathDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+
+                deathInvenHistoriesNbtList.add(historyNbt);
+            }
+            playerNbt.put("deathInvenHistories", deathInvenHistoriesNbtList);
+
             playersNbt.put(uuid.toString(), playerNbt);
         });
         nbt.put("players", playersNbt);
@@ -162,6 +186,35 @@ public class ServerPlayerDataManager extends PersistentState {
                 float experience = playerNbt.getFloat("playerExperience");
                 playerData.setLevelInfo(new Pair(level, experience)); // 복원된 레벨 정보를 playerData에 설정
             }
+
+            if (playerNbt.contains("deathInvenHistories")) {
+                NbtList deathHistoriesNbt = playerNbt.getList("deathInvenHistories", 10); // 10은 NbtCompound 타입을 의미
+                List<PlayerDeathInvenHistory> deathHistories = new ArrayList<>();
+
+                for (NbtElement elem : deathHistoriesNbt) {
+                    NbtCompound historyNbt = (NbtCompound) elem;
+
+                    // 아이템 스택 복원
+                    NbtList itemsNbt = historyNbt.getList("itemStacks", 10);
+                    List<ItemStack> items = new ArrayList<>();
+                    for (NbtElement itemElem : itemsNbt) {
+                        items.add(ItemStack.fromNbt((NbtCompound) itemElem));
+                    }
+
+                    // 레벨 정보 복원
+                    int level = historyNbt.getInt("level");
+                    float experience = historyNbt.getFloat("experience");
+                    Pair<Integer, Float> levelInfo = new Pair<>(level, experience);
+
+                    // 사망 날짜 복원
+                    LocalDateTime deathDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(historyNbt.getLong("deathDate")), ZoneId.systemDefault());
+
+                    deathHistories.add(new PlayerDeathInvenHistory(items, levelInfo, deathDate));
+                }
+
+                playerData.setDeathInvenHistories(deathHistories);
+            }
+
 
             UUID uuid = UUID.fromString(key);
             state.playerDataMap.put(uuid, playerData);

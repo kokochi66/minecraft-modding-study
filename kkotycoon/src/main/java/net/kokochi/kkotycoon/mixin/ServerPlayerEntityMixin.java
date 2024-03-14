@@ -3,6 +3,7 @@ package net.kokochi.kkotycoon.mixin;
 
 import net.kokochi.kkotycoon.entity.item.KkoTycoonItems;
 import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
+import net.kokochi.kkotycoon.entity.player.PlayerDeathInvenHistory;
 import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -16,6 +17,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.stat.Stat;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
@@ -49,7 +51,7 @@ public abstract class ServerPlayerEntityMixin {
         }
     }
 
-    @Inject(method = "onSpawn", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "onSpawn", at = @At("TAIL"), cancellable = true)
     private void injectOnSpawn(CallbackInfo ci) {
         ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
         if (!player.getWorld().isClient) {
@@ -58,35 +60,63 @@ public abstract class ServerPlayerEntityMixin {
 
             // 아이템 스택 복원
             List<ItemStack> itemStacks = playerData.getItemStacks();
-            if (itemStacks != null && !itemStacks.isEmpty()) {
+            if (itemStacks != null
+                    && !itemStacks.isEmpty()
+            ) {
                 PlayerInventory inventory = player.getInventory();
-                inventory.clear(); // 기존 인벤토리를 클리어
-                for (int i = 0; i < itemStacks.size(); i++) {
-                    ItemStack stack = itemStacks.get(i);
-                    if (i >= 0 && i <= 3) { // Armor slots are usually 0-3, from feet to head
-                        inventory.armor.set(i, stack); // Reverse armor order to match inventory order
-                    } else if (i == 4) { // Off-hand slot
-                        inventory.offHand.set(0, stack); // Off-hand slot is a single slot, usually at index 0
-                    } else {
-                        // Main inventory slots start after armor and off-hand, so adjust the index accordingly
-                        int mainInventoryIndex = i - inventory.armor.size() - inventory.offHand.size();
-                        if (mainInventoryIndex < inventory.main.size()) {
-                            inventory.main.set(mainInventoryIndex, stack); // Set stack in main inventory
-                        }
+                // 기존 인벤토리가 모두 비어있는 경우에만 동작합니다. (재접속 방지)
+                boolean allInvenClear = true;
+
+                // 인벤토리 체크
+                for (int i = 0; i < PlayerInventory.MAIN_SIZE; i ++) {
+                    if (Item.getRawId(inventory.getStack(i).getItem()) != Item.getRawId(Items.AIR)) {
+                        allInvenClear = false;
+                        break;
                     }
                 }
-                playerData.setItemStacks(null); // 복원 후 데이터 삭제
-            }
 
-            // 레벨과 경험치 복원
-            Pair<Integer, Float> levelInfo = playerData.getLevelInfo();
-            if (levelInfo != null) {
-                player.experienceLevel = levelInfo.getLeft(); // 플레이어 레벨 설정
-                player.experienceProgress = levelInfo.getRight(); // 경험치 설정
-                playerData.setLevelInfo(null); // 복원 후 데이터 삭제
-                player.sendMessage(Text.of("인벤토리 세이브권을 사용하여 데이터가 복원되었습니다."));
-            }
+                // 서브 손 체크
+                ItemStack offHandStack = player.getOffHandStack();
+                if (Item.getRawId(offHandStack.getItem()) != Item.getRawId(Items.AIR)) {
+                    allInvenClear = false;
+                }
 
+                // 장비 창 체크
+                for (int i = 0; i < PlayerInventory.ARMOR_SLOTS.length; i ++) {
+                    if (Item.getRawId(inventory.getArmorStack(i).getItem()) != Item.getRawId(Items.AIR)) {
+                        allInvenClear = false;
+                        break;
+                    }
+                }
+
+                if (allInvenClear) {
+                    inventory.clear(); // 기존 인벤토리를 클리어
+                    for (int i = 0; i < itemStacks.size(); i++) {
+                        ItemStack stack = itemStacks.get(i);
+                        if (i >= 0 && i <= 3) { // Armor slots are usually 0-3, from feet to head
+                            inventory.armor.set(i, stack); // Reverse armor order to match inventory order
+                        } else if (i == 4) { // Off-hand slot
+                            inventory.offHand.set(0, stack); // Off-hand slot is a single slot, usually at index 0
+                        } else {
+                            // Main inventory slots start after armor and off-hand, so adjust the index accordingly
+                            int mainInventoryIndex = i - inventory.armor.size() - inventory.offHand.size();
+                            if (mainInventoryIndex < inventory.main.size()) {
+                                inventory.main.set(mainInventoryIndex, stack); // Set stack in main inventory
+                            }
+                        }
+                    }
+                    playerData.setItemStacks(null); // 복원 후 데이터 삭제
+
+                    // 레벨과 경험치 복원
+                    Pair<Integer, Float> levelInfo = playerData.getLevelInfo();
+                    if (levelInfo != null) {
+                        player.experienceLevel = levelInfo.getLeft(); // 플레이어 레벨 설정
+                        player.experienceProgress = levelInfo.getRight(); // 경험치 설정
+                        playerData.setLevelInfo(null); // 복원 후 데이터 삭제
+                        player.sendMessage(Text.of("인벤토리 세이브권을 사용하여 데이터가 복원되었습니다."));
+                    }
+                }
+            }
             playerData.setLoginDate(LocalDateTime.now());
         }
     }
@@ -111,6 +141,7 @@ public abstract class ServerPlayerEntityMixin {
                 for (ItemStack stack : inventory.offHand) {
                     if (Item.getRawId(stack.getItem()) == Item.getRawId(KkoTycoonItems.INVENTORY_SAVE_TICKET)
                             && !inventorySaveTicketMinus) {
+                        inventorySaveTicketMinus = true;
                         stack.setCount(stack.getCount() - 1);
                         if (stack.getCount() == 0) {
                             stack = new ItemStack(Items.AIR);
@@ -123,6 +154,7 @@ public abstract class ServerPlayerEntityMixin {
                     ItemStack stack = inventory.getStack(i);
                     if (Item.getRawId(stack.getItem()) == Item.getRawId(KkoTycoonItems.INVENTORY_SAVE_TICKET)
                             && !inventorySaveTicketMinus) {
+                        inventorySaveTicketMinus = true;
                         stack.setCount(stack.getCount() - 1);
                         if (stack.getCount() == 0) {
                             stack = new ItemStack(Items.AIR);
@@ -137,8 +169,8 @@ public abstract class ServerPlayerEntityMixin {
 
                 playerData.setItemStacks(items);
                 playerData.setLevelInfo(new Pair<>(playerLevel, playerExperience));
+                playerData.getDeathInvenHistories().add(new PlayerDeathInvenHistory(items, new Pair<>(playerLevel, playerExperience)));
             }
-
 
             playerData.setAccumulatedDeathCount(playerData.getAccumulatedDeathCount() + 1);
         }

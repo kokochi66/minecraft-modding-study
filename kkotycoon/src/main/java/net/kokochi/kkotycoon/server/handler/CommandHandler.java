@@ -12,6 +12,7 @@ import net.kokochi.kkotycoon.entity.codex.CodexSet;
 import net.kokochi.kkotycoon.entity.item.KkoTycoonItems;
 import net.kokochi.kkotycoon.entity.player.ClientPlayerDataManager;
 import net.kokochi.kkotycoon.entity.player.KkotycoonPlayerData;
+import net.kokochi.kkotycoon.entity.player.PlayerDeathInvenHistory;
 import net.kokochi.kkotycoon.entity.player.ServerPlayerDataManager;
 import net.kokochi.kkotycoon.packet.KkotycoonMainDataS2CGetPacket;
 import net.kokochi.kkotycoon.packet.ShopScreenS2CPacket;
@@ -35,6 +36,7 @@ import net.minecraft.util.Pair;
 
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -94,6 +96,59 @@ public class CommandHandler {
                                         ServerPlayNetworking.send(player, responsePacketId, responseBuf);
                                         return 1;
                                     }))
+                            // 플레이어 사망 이력 로그로 확인
+                            .then(CommandManager.literal("deathHistory")
+                                    .executes(context -> {
+                                        ServerPlayerEntity adminPlayer = context.getSource().getPlayer();
+                                        String playerId = StringArgumentType.getString(context, "playerId");
+                                        ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+
+                                        KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
+                                        List<PlayerDeathInvenHistory> deathHistories = playerData.getDeathInvenHistories();
+
+                                        // 최신 사망 이력 20건만 조회
+                                        int historyCount = Math.min(deathHistories.size(), 20);
+                                        for (int i = 0; i < historyCount; i++) {
+                                            PlayerDeathInvenHistory history = deathHistories.get(deathHistories.size() - 1 - i); // 최신 이력부터
+                                            LocalDateTime deathDate = history.getDeathDate();
+                                            String formattedDate = deathDate.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
+                                            adminPlayer.sendMessage(Text.literal(String.format("{%d}: {%s}", i + 1, formattedDate)), false);
+                                        }
+
+                                        return 1;
+
+                                    }))
+                            // 사망 데이터를 복구합니다. (어드민 사용자에게 들어감)
+                            .then(CommandManager.literal("deathRecover")
+                                    .then(CommandManager.argument("index", IntegerArgumentType.integer())
+                                            .executes(context -> {
+                                                ServerPlayerEntity adminPlayer = context.getSource().getPlayer();
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                Integer index = IntegerArgumentType.getInteger(context, "index");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+
+                                                KkotycoonPlayerData playerData = ServerPlayerDataManager.getPlayerData(player);
+                                                List<PlayerDeathInvenHistory> deathHistories = playerData.getDeathInvenHistories();
+
+                                                PlayerDeathInvenHistory playerDeathInvenHistory = deathHistories.get(index - 1);
+                                                List<ItemStack> itemStacks = playerDeathInvenHistory.getItemStacks();
+                                                PlayerInventory inventory = adminPlayer.getInventory();
+                                                for (int i = 0; i < itemStacks.size(); i++) {
+                                                    ItemStack stack = itemStacks.get(i);
+                                                    if (i >= 0 && i <= 3) { // Armor slots are usually 0-3, from feet to head
+                                                        inventory.armor.set(i, stack); // Reverse armor order to match inventory order
+                                                    } else if (i == 4) { // Off-hand slot
+                                                        inventory.offHand.set(0, stack); // Off-hand slot is a single slot, usually at index 0
+                                                    } else {
+                                                        // Main inventory slots start after armor and off-hand, so adjust the index accordingly
+                                                        int mainInventoryIndex = i - inventory.armor.size() - inventory.offHand.size();
+                                                        if (mainInventoryIndex < inventory.main.size()) {
+                                                            inventory.main.set(mainInventoryIndex, stack); // Set stack in main inventory
+                                                        }
+                                                    }
+                                                }
+                                                return 1;
+                                            })))
                     )
                     // 도감에 커스텀 아이템을 추가합니다.
                     .then(CommandManager.literal("addCodex")
@@ -218,178 +273,189 @@ public class CommandHandler {
                             }))
                     .then(CommandManager.literal("setName")
                             .then(CommandManager.argument("name", StringArgumentType.string())
-                            .executes(context -> {
-                                ServerPlayerEntity player = context.getSource().getPlayer();
-                                String name = StringArgumentType.getString(context, "name");
-                                player.setCustomName(Text.of(name));
-                                return 1;
-                            })))
+                                    .executes(context -> {
+                                        ServerPlayerEntity player = context.getSource().getPlayer();
+                                        String name = StringArgumentType.getString(context, "name");
+                                        player.setCustomName(Text.of(name));
+                                        return 1;
+                                    })))
                     .then(CommandManager.literal("ranking")
-                            .then(CommandManager.literal("dist")
-                                    .executes(context -> {
-                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
-                                        List<Pair<String, Double>> data = new ArrayList<>();
-                                        for (UUID uuid : playerDataMap.keySet()) {
-                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
-                                            data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedDistance()));
-                                        }
-                                        data.sort((a, b) -> Double.compare(b.getRight(), a.getRight()));
+                            .then(CommandManager.argument("playerId", StringArgumentType.string())
+                                    .then(CommandManager.literal("dist")
+                                            .executes(context -> {
+                                                HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                                List<Pair<String, Double>> data = new ArrayList<>();
+                                                for (UUID uuid : playerDataMap.keySet()) {
+                                                    KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+                                                    data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedDistance()));
+                                                }
+                                                data.sort((a, b) -> Double.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
-                                        player.sendMessage(Text.of("== 누적 이동 거리 랭킹 =="));
-                                        for (int i = 0; i < data.size(); i++) {
-                                            player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
-                                        }
-                                        return 1;
-                                    }))
-                            .then(CommandManager.literal("ore")
-                                    .executes(context -> {
-                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
-                                        List<Pair<String, Integer>> data = new ArrayList<>();
-                                        for (UUID uuid : playerDataMap.keySet()) {
-                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
-                                            data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedBreakOreBlock()));
-                                        }
-                                        data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+                                                player.sendMessage(Text.of("== 누적 이동 거리 랭킹 =="));
+                                                for (int i = 0; i < data.size(); i++) {
+                                                    player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
+                                                }
+                                                return 1;
+                                            }))
+                                    .then(CommandManager.literal("ore")
+                                            .executes(context -> {
+                                                HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                                List<Pair<String, Integer>> data = new ArrayList<>();
+                                                for (UUID uuid : playerDataMap.keySet()) {
+                                                    KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+                                                    data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedBreakOreBlock()));
+                                                }
+                                                data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
-                                        player.sendMessage(Text.of("== 누적 캔 광물 블록 랭킹 =="));
-                                        for (int i = 0; i < data.size(); i++) {
-                                            player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
-                                        }
-                                        return 1;
-                                    }))
-                            .then(CommandManager.literal("crop")
-                                    .executes(context -> {
-                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
-                                        List<Pair<String, Integer>> data = new ArrayList<>();
-                                        for (UUID uuid : playerDataMap.keySet()) {
-                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
-                                            data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedBreakCropBlock()));
-                                        }
-                                        data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+                                                player.sendMessage(Text.of("== 누적 캔 광물 블록 랭킹 =="));
+                                                for (int i = 0; i < data.size(); i++) {
+                                                    player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
+                                                }
+                                                return 1;
+                                            }))
+                                    .then(CommandManager.literal("crop")
+                                            .executes(context -> {
+                                                HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                                List<Pair<String, Integer>> data = new ArrayList<>();
+                                                for (UUID uuid : playerDataMap.keySet()) {
+                                                    KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+                                                    data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedBreakCropBlock()));
+                                                }
+                                                data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
-                                        player.sendMessage(Text.of("== 누적 캔 농작물 블록 랭킹 =="));
-                                        for (int i = 0; i < data.size(); i++) {
-                                            player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
-                                        }
-                                        return 1;
-                                    }))
-                            .then(CommandManager.literal("block")
-                                    .executes(context -> {
-                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
-                                        List<Pair<String, Integer>> data = new ArrayList<>();
-                                        for (UUID uuid : playerDataMap.keySet()) {
-                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
-                                            data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedBlock()));
-                                        }
-                                        data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+                                                player.sendMessage(Text.of("== 누적 캔 농작물 블록 랭킹 =="));
+                                                for (int i = 0; i < data.size(); i++) {
+                                                    player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
+                                                }
+                                                return 1;
+                                            }))
+                                    .then(CommandManager.literal("block")
+                                            .executes(context -> {
+                                                HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                                List<Pair<String, Integer>> data = new ArrayList<>();
+                                                for (UUID uuid : playerDataMap.keySet()) {
+                                                    KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+                                                    data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedBlock()));
+                                                }
+                                                data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
-                                        player.sendMessage(Text.of("== 누적 캔 블록 랭킹 =="));
-                                        for (int i = 0; i < data.size(); i++) {
-                                            player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
-                                        }
-                                        return 1;
-                                    }))
-                            .then(CommandManager.literal("killMonster")
-                                    .executes(context -> {
-                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
-                                        List<Pair<String, Integer>> data = new ArrayList<>();
-                                        for (UUID uuid : playerDataMap.keySet()) {
-                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
-                                            data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedKilledMonster()));
-                                        }
-                                        data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+                                                player.sendMessage(Text.of("== 누적 캔 블록 랭킹 =="));
+                                                for (int i = 0; i < data.size(); i++) {
+                                                    player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
+                                                }
+                                                return 1;
+                                            }))
+                                    .then(CommandManager.literal("killMonster")
+                                            .executes(context -> {
+                                                HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                                List<Pair<String, Integer>> data = new ArrayList<>();
+                                                for (UUID uuid : playerDataMap.keySet()) {
+                                                    KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+                                                    data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedKilledMonster()));
+                                                }
+                                                data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
-                                        player.sendMessage(Text.of("== 누적 몬스터 킬 수 랭킹 =="));
-                                        for (int i = 0; i < data.size(); i++) {
-                                            player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
-                                        }
-                                        return 1;
-                                    }))
-                            .then(CommandManager.literal("killAnimal")
-                                    .executes(context -> {
-                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
-                                        List<Pair<String, Integer>> data = new ArrayList<>();
-                                        for (UUID uuid : playerDataMap.keySet()) {
-                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
-                                            data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedKilledAnimal()));
-                                        }
-                                        data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+                                                player.sendMessage(Text.of("== 누적 몬스터 킬 수 랭킹 =="));
+                                                for (int i = 0; i < data.size(); i++) {
+                                                    player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
+                                                }
+                                                return 1;
+                                            }))
+                                    .then(CommandManager.literal("killAnimal")
+                                            .executes(context -> {
+                                                HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                                List<Pair<String, Integer>> data = new ArrayList<>();
+                                                for (UUID uuid : playerDataMap.keySet()) {
+                                                    KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+                                                    data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedKilledAnimal()));
+                                                }
+                                                data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
-                                        player.sendMessage(Text.of("== 누적 동물 킬 수 랭킹 =="));
-                                        for (int i = 0; i < data.size(); i++) {
-                                            player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
-                                        }
-                                        return 1;
-                                    }))
-                            .then(CommandManager.literal("damaged")
-                                    .executes(context -> {
-                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
-                                        List<Pair<String, Double>> data = new ArrayList<>();
-                                        for (UUID uuid : playerDataMap.keySet()) {
-                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
-                                            data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedDamaged()));
-                                        }
-                                        data.sort((a, b) -> Double.compare(b.getRight(), a.getRight()));
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+                                                player.sendMessage(Text.of("== 누적 동물 킬 수 랭킹 =="));
+                                                for (int i = 0; i < data.size(); i++) {
+                                                    player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
+                                                }
+                                                return 1;
+                                            }))
+                                    .then(CommandManager.literal("damaged")
+                                            .executes(context -> {
+                                                HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                                List<Pair<String, Double>> data = new ArrayList<>();
+                                                for (UUID uuid : playerDataMap.keySet()) {
+                                                    KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+                                                    data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedDamaged()));
+                                                }
+                                                data.sort((a, b) -> Double.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
-                                        player.sendMessage(Text.of("== 누적 입은 피해량 랭킹 =="));
-                                        for (int i = 0; i < data.size(); i++) {
-                                            player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
-                                        }
-                                        return 1;
-                                    }))
-                            .then(CommandManager.literal("attack")
-                                    .executes(context -> {
-                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
-                                        List<Pair<String, Double>> data = new ArrayList<>();
-                                        for (UUID uuid : playerDataMap.keySet()) {
-                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
-                                            data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedAttack()));
-                                        }
-                                        data.sort((a, b) -> Double.compare(b.getRight(), a.getRight()));
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+                                                player.sendMessage(Text.of("== 누적 입은 피해량 랭킹 =="));
+                                                for (int i = 0; i < data.size(); i++) {
+                                                    player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
+                                                }
+                                                return 1;
+                                            }))
+                                    .then(CommandManager.literal("attack")
+                                            .executes(context -> {
+                                                HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                                List<Pair<String, Double>> data = new ArrayList<>();
+                                                for (UUID uuid : playerDataMap.keySet()) {
+                                                    KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+                                                    data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedAttack()));
+                                                }
+                                                data.sort((a, b) -> Double.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
-                                        player.sendMessage(Text.of("== 누적 입힌 피해량 랭킹 =="));
-                                        for (int i = 0; i < data.size(); i++) {
-                                            player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
-                                        }
-                                        return 1;
-                                    }))
-                            .then(CommandManager.literal("playtime")
-                                    .executes(context -> {
-                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
-                                        List<Pair<String, Long>> data = new ArrayList<>();
-                                        for (UUID uuid : playerDataMap.keySet()) {
-                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
-                                            data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedPlayTime() +
-                                                    ChronoUnit.SECONDS.between(playerData.getLoginDate(), LocalDateTime.now())));
-                                        }
-                                        data.sort((a, b) -> Long.compare(b.getRight(), a.getRight()));
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+                                                player.sendMessage(Text.of("== 누적 입힌 피해량 랭킹 =="));
+                                                for (int i = 0; i < data.size(); i++) {
+                                                    player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
+                                                }
+                                                return 1;
+                                            }))
+                                    .then(CommandManager.literal("playtime")
+                                            .executes(context -> {
+                                                HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                                List<Pair<String, Long>> data = new ArrayList<>();
+                                                for (UUID uuid : playerDataMap.keySet()) {
+                                                    KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+                                                    data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedPlayTime() +
+                                                            ChronoUnit.SECONDS.between(playerData.getLoginDate(), LocalDateTime.now())));
+                                                }
+                                                data.sort((a, b) -> Long.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
-                                        player.sendMessage(Text.of("== 누적 플레이 타임 랭킹 =="));
-                                        for (int i = 0; i < data.size(); i++) {
-                                            player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
-                                        }
-                                        return 1;
-                                    }))
-                            .then(CommandManager.literal("onBlock")
-                                    .executes(context -> {
-                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
-                                        List<Pair<String, Integer>> data = new ArrayList<>();
-                                        for (UUID uuid : playerDataMap.keySet()) {
-                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+                                                player.sendMessage(Text.of("== 누적 플레이 타임 랭킹 =="));
+                                                for (int i = 0; i < data.size(); i++) {
+                                                    player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
+                                                }
+                                                return 1;
+                                            }))
+                                    .then(CommandManager.literal("onBlock")
+                                            .executes(context -> {
+                                                HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                                List<Pair<String, Integer>> data = new ArrayList<>();
+                                                for (UUID uuid : playerDataMap.keySet()) {
+                                                    KkotycoonPlayerData playerData = playerDataMap.get(uuid);
                                             data.add(new Pair(playerData.getPlayerName(), playerData.getAccumulatedOnBlock()));
                                         }
                                         data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
+                                                String playerId = StringArgumentType.getString(context, "playerId");
+                                                ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
                                         player.sendMessage(Text.of("== 누적 놓은 블록 랭킹 =="));
                                         for (int i = 0; i < data.size(); i++) {
                                             player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
@@ -406,14 +472,40 @@ public class CommandHandler {
                                         }
                                         data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
 
-                                        ServerPlayerEntity player = context.getSource().getPlayer();
+                                        String playerId = StringArgumentType.getString(context, "playerId");
+                                        ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
                                         player.sendMessage(Text.of("== 누적 사망 랭킹 =="));
                                         for (int i = 0; i < data.size(); i++) {
                                             player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
                                         }
                                         return 1;
                                     }))
-                    )
+                            .then(CommandManager.literal("codexCount")
+                                    .executes(context -> {
+                                        HashMap<UUID, KkotycoonPlayerData> playerDataMap = ServerPlayerDataManager.playerDataMap;
+                                        List<Pair<String, Integer>> data = new ArrayList<>();
+                                        for (UUID uuid : playerDataMap.keySet()) {
+                                            KkotycoonPlayerData playerData = playerDataMap.get(uuid);
+
+                                            int codexCount = 0;
+                                            for (byte b : playerData.getCodexArray()) {
+                                                if (b == 1) {
+                                                    codexCount++;
+                                                }
+                                            }
+                                            data.add(new Pair(playerData.getPlayerName(), codexCount));
+                                        }
+                                        data.sort((a, b) -> Integer.compare(b.getRight(), a.getRight()));
+
+                                        String playerId = StringArgumentType.getString(context, "playerId");
+                                        ServerPlayerEntity player = context.getSource().getServer().getPlayerManager().getPlayer(playerId);
+                                        player.sendMessage(Text.of("== 누적 도감 랭킹 =="));
+                                        for (int i = 0; i < data.size(); i++) {
+                                            player.sendMessage(Text.of(i + "." + data.get(i).getLeft() + " : " + data.get(i).getRight()));
+                                        }
+                                        return 1;
+                                    }))
+                    ))
             );
         });
     }
